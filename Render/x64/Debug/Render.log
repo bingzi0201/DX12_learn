@@ -1,38 +1,50 @@
-﻿  RenderApp.cpp
-G:\Render0225\trunk\Render\src\DXMath\Scalar.h(23,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Scalar.h(24,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Scalar.h(25,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Scalar.h(26,32): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Quaternion.h(21,22): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Quaternion.h(22,22): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Quaternion.h(23,22): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Quaternion.h(24,31): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Quaternion.h(25,31): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Quaternion.h(26,31): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix3.h(23,22): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix3.h(24,22): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix3.h(29,22): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix3.h(34,22): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix3.h(35,31): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix3.h(40,31): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix3.h(45,31): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(22,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(23,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(28,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(29,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(30,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(37,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(38,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(45,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(46,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\DXMath\Matrix4.h(47,23): warning C4166: 构造函数/析构函数的非法调用约定
-G:\Render0225\trunk\Render\src\Component\Camera.h(23,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-G:\Render0225\trunk\Render\src\Component\Camera.h(24,14): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
-G:\Render0225\trunk\Render\src\Common\RenderApp.cpp(309,72): warning C4305: “参数”: 从“double”到“float”截断
-G:\Render0225\trunk\Render\src\Common\RenderApp.cpp(310,65): warning C4305: “参数”: 从“double”到“float”截断
-G:\Render0225\trunk\Render\src\Common\RenderApp.cpp(311,71): warning C4305: “参数”: 从“double”到“float”截断
-G:\Render0225\trunk\Render\src\Common\RenderApp.cpp(312,69): warning C4305: “参数”: 从“double”到“float”截断
-G:\Render0225\trunk\Render\src\Common\RenderApp.cpp(321,81): warning C4267: “参数”: 从“size_t”转换到“UINT”，可能丢失数据
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\memory(3381,1): warning C4267: “参数”: 从“size_t”转换到“uint”，可能丢失数据
-G:\Render0225\trunk\Render\src\Common\RenderApp.cpp(243): message : 查看对正在编译的函数 模板 实例化“std::unique_ptr<Mesh,std::default_delete<Mesh>> std::make_unique<Mesh,Device*,std::vector<const rtti::Struct *,std::allocator<const rtti::Struct *>>&,size_t,size_t,0>(Device *&&,std::vector<const rtti::Struct *,std::allocator<const rtti::Struct *>> &,size_t &&,size_t &&)”的引用
-  Render.vcxproj -> G:\Render0225\trunk\Render\x64\Debug\Render.exe
+﻿  ================================================
+  Building shaders to "G:\Render0314\trunk\Render\Shaders\Compiled"
+  ================================================
+  [BasePassDefault] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\BasePassDefaultVS.cso
+  [BasePassDefault] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\BasePassDefaultPS.cso
+  [Primitive] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\PrimitiveVS.cso
+  [Primitive] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\PrimitivePS.cso
+  [DefferedLightng] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\DeferredLightingVS.cso
+  [DefferedLightng] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\DeferredLightingPS.cso
+  [PostProcess] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\PostProcess.cso
+  [PostProcess] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+G:\Render0314\trunk\Render\Shaders\PostProcess.hlsl(52,27-49): warning X3571: pow(f, e) will not work for negative f, use abs(f) or conditionally handle negative values if you expect them
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\PostProcess.cso
+  
+  All shaders compiled successfully.
+  Render.cpp
+G:\Render0314\trunk\Render\src\Render\Render.cpp(4,10): warning C4067: 预处理器指令后有意外标记 - 应输入换行符
+  Render.vcxproj -> G:\Render0314\trunk\Render\x64\Debug\Render.exe

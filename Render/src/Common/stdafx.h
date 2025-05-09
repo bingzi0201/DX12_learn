@@ -23,3 +23,7 @@
 
 #include <wincodec.h>
 #include <unordered_map>
+
+#include "Assimp/Importer.hpp"
+#include "Assimp/scene.h"
+#include "Assimp/postprocess.h"

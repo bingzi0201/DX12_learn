@@ -23,6 +23,7 @@ requires(std::is_bounded_array_v<T>) constexpr size_t array_byte_size(T const& t
 }
 
 using vbyte = uint8_t;
+using uint16 = uint16_t;
 using uint = uint32_t;
 using uint64 = uint64_t;
 using int32 = int32_t; 
