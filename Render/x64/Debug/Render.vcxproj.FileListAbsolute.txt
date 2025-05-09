@@ -1,3 +1,6 @@
-G:\Render_New\trunk\Render\x64\Debug\Render.exe
-G:\Render_0211\trunk\Render\x64\Debug\Render.exe
-G:\Render0225\trunk\Render\x64\Debug\Render.exe
+G:\Render0314\trunk\Render\x64\Debug\Render.vcxproj.CopyComplete
+G:\Render0314\trunk\Render\x64\Debug\Render.exe
+G:\Render0314\trunk\Render\x64\Debug\poly2tri.dll
+G:\Render0314\trunk\Render\x64\Debug\minizip.dll
+G:\Render0314\trunk\Render\x64\Debug\zlibd1.dll
+G:\Render0314\trunk\Render\x64\Debug\pugixml.dll

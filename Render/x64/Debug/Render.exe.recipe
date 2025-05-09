@@ -2,14 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>G:\Render0225\trunk\Render\x64\Debug\Render.exe</FullPath>
+      <FullPath>G:\Render0314\trunk\Render\x64\Debug\Render.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
-  <ContentFiles>
-    <ContentFile>
-      <FullPath>G:\Render0225\trunk\Render\x64\Debug\Shader.cso</FullPath>
-    </ContentFile>
-  </ContentFiles>
+  <ContentFiles />
   <SatelliteDlls />
   <NonRecipeFileRefs />
 </Project>
