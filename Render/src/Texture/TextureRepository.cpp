@@ -18,6 +18,11 @@ void TextureRepository::Load()
 	textureMap.emplace("Gun_Normal", std::make_shared<Texture2D>("Gun_Normal", false, TextureDir + L"Gun_Normal.png"));
 	textureMap.emplace("Gun_Roughness", std::make_shared<Texture2D>("Gun_Roughness", false, TextureDir + L"Gun_Roughness.png"));
 	textureMap.emplace("Gun_Metallic", std::make_shared<Texture2D>("Gun_Metallic", false, TextureDir + L"Gun_Metallic.png"));
+
+	// LUT
+	textureMap.emplace("IBL_BRDF_LUT", std::make_shared<Texture2D>("IBL_BRDF_LUT", false, TextureDir + L"IBL_BRDF_LUT.png"));
+	// HDR
+	textureMap.emplace("bloem_hill", std::make_shared<Texture2D>("bloem_hill", false, TextureDir + L"bloem_hill_01_2k.hdr"));
 }
 
 void TextureRepository::Unload()

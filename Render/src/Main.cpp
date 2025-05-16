@@ -5,6 +5,7 @@
 #include "Actor/Light/DirectionalLightActor.h"
 #include "Actor/Light/PointLightActor.h"
 #include "Actor/Light/SpotLightActor.h"
+#include "Actor/HDRSkyActor.h"
 
 class TestWorld : public World
 {
@@ -49,6 +50,14 @@ public:
 			light->SetLightIntensity(10.0f);
 		}
 
+		// Add Enviroment Cube Light
+		{
+			auto HDRLight = AddActor<HDRSkyActor>("HDRSky");
+			HDRLight->SetMaterialInstance("HDRSkyMatInst");
+			TTransform transform;
+			transform.Scale = TVector3(5000.0f, 5000.0f, 5000.0f);
+			HDRLight->SetActorTransform(transform);
+		}
 	}
 };
 

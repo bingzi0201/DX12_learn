@@ -32,27 +32,38 @@ void MaterialRepository::Load()
 			gunMatInst->SetTextureParamter("MetallicTexture", "Gun_Metallic");
 			gunMatInst->SetTextureParamter("RoughnessTexture", "Gun_Roughness");
 		}
+
+		{
+			MaterialInstance* emissiveMatInst = CreateMaterialInstance(defaultMat, "EmissiveMatInst");
+
+			MaterialParameters& parameters = emissiveMatInst->parameters;
+			parameters.emissiveColor = TVector3(1.0f);
+			emissiveMatInst->SetTextureParamter("BaseColorTexture", "NullTex");
+			emissiveMatInst->SetTextureParamter("NormalTexture", "NullTex");
+			emissiveMatInst->SetTextureParamter("MetallicTexture", "NullTex");
+			emissiveMatInst->SetTextureParamter("RoughnessTexture", "NullTex");
+		}
 	}
 
 
 
-	//--------------------------------------SkyMat------------------------------------------------------
-// 	{
-// 		// Material
-// 		Material* skyMat = CreateMaterial("SkyMat", "BasePassSky");
-// 
-// 		MaterialParameters& parameters = skyMat->parameters;
-// 		parameters.textureMap.emplace("SkyCubeTexture", "Shiodome_Stairs");
-// 
-// 		MaterialRenderState& renderState = skyMat->renderState;
-// 		renderState.cullMode = D3D12_CULL_MODE_NONE;
-// 		renderState.depthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-// 
-// 		skyMat->shadingModel = EShadingMode::Unlit;
-// 
-// 		// MaterialInstance
-// 		CreateDefaultMaterialInstance(skyMat);
-// 	}
+	//--------------------------------------EnviromentMat------------------------------------------------------
+	{
+		// Material
+		Material* enviromentMat = CreateMaterial("HDRSkyMat", "BasePassSky");
+
+		MaterialParameters& parameters = enviromentMat->parameters;
+		parameters.textureMap.emplace("SkyCubeTexture", "bloem_hill");
+
+		MaterialRenderState& renderState = enviromentMat->renderState;
+		renderState.cullMode = D3D12_CULL_MODE_NONE;
+		renderState.depthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+		enviromentMat->shadingModel = EShadingMode::Unlit;
+
+		// MaterialInstance
+		CreateDefaultMaterialInstance(enviromentMat);
+	}
 }
 
 void MaterialRepository::Unload()

@@ -1,26 +1,63 @@
 @echo off
-rem -----------------------------------------------------------------------------
-rem build_shaders.bat
-rem 在 Shaders 目录下运行，自动编译 VS/PS 两个入口点
-rem -----------------------------------------------------------------------------
 
 setlocal
 
-rem 脚本所在目录（Shaders\）
 set SHADER_DIR=%~dp0
 
-rem 输出目录：Shaders\Compiled\
 set OUTDIR=%SHADER_DIR%Compiled
 if not exist "%OUTDIR%" (
     mkdir "%OUTDIR%"
 )
 
-rem FXC 可执行文件，假设已加入 PATH
 set FXC=fxc.exe
 
 echo ================================================
 echo Building shaders to "%OUTDIR%"
 echo ================================================
+
+rem -------------------------------
+rem IBLEnvironment.hlsl
+rem -------------------------------
+echo [IBLEnvironment] VS...
+"%FXC%" /T vs_5_0 /E VS   "%SHADER_DIR%IBLEnvironment.hlsl" /Fo "%OUTDIR%\IBLEnvironmentVS.cso"
+if errorlevel 1 goto :error
+
+echo [IBLEnvironment] PS...
+"%FXC%" /T ps_5_0 /E PS   "%SHADER_DIR%IBLEnvironment.hlsl" /Fo "%OUTDIR%\IBLEnvironmentPS.cso"
+if errorlevel 1 goto :error
+
+rem -------------------------------
+rem IBLIrradiance.hlsl
+rem -------------------------------
+echo [IBLIrradiance] VS...
+"%FXC%" /T vs_5_0 /E VS   "%SHADER_DIR%IBLIrradiance.hlsl" /Fo "%OUTDIR%\IBLIrradianceVS.cso"
+if errorlevel 1 goto :error
+
+echo [IBLIrradiance] PS...
+"%FXC%" /T ps_5_0 /E PS   "%SHADER_DIR%IBLIrradiance.hlsl" /Fo "%OUTDIR%\IBLIrradiancePS.cso"
+if errorlevel 1 goto :error
+
+rem -------------------------------
+rem IBLPrefilterEnv.hlsl
+rem -------------------------------
+echo [IBLPrefilterEnv] VS...
+"%FXC%" /T vs_5_0 /E VS   "%SHADER_DIR%IBLPrefilterEnv.hlsl" /Fo "%OUTDIR%\IBLPrefilterEnvVS.cso"
+if errorlevel 1 goto :error
+
+echo [IBLPrefilterEnv] PS...
+"%FXC%" /T ps_5_0 /E PS   "%SHADER_DIR%IBLPrefilterEnv.hlsl" /Fo "%OUTDIR%\IBLPrefilterEnvPS.cso"
+if errorlevel 1 goto :error
+
+rem -------------------------------
+rem BasePassSky.hlsl
+rem -------------------------------
+echo [BasePassSky] VS...
+"%FXC%" /T vs_5_0 /E VS   "%SHADER_DIR%BasePassSky.hlsl" /Fo "%OUTDIR%\BasePassSkyVS.cso"
+if errorlevel 1 goto :error
+
+echo [BasePassSky] PS...
+"%FXC%" /T ps_5_0 /E PS   "%SHADER_DIR%BasePassSky.hlsl" /Fo "%OUTDIR%\BasePassSkyPS.cso"
+if errorlevel 1 goto :error
 
 rem -------------------------------
 rem BasePassDefault.hlsl

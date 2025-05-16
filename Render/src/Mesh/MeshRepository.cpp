@@ -24,23 +24,24 @@ void MeshRepository::Load()
 // 	meshLoader->LoadModel(L"test.fbx", personMesh);
 // 	meshMap.emplace("test", std::move(personMesh));
 
-	Mesh BoxMesh;
-	BoxMesh.CreateBox(1.0f, 1.0f, 1.0f, 3);
-	BoxMesh.meshName = "BoxMesh";
-	BoxMesh.GenerateBoundingBox();
-	meshMap.emplace("BoxMesh", std::move(BoxMesh));
+	Mesh boxMesh;
+	boxMesh.CreateBox(1.0f, 1.0f, 1.0f, 3);
+	boxMesh.meshName = "BoxMesh";
+	boxMesh.GenerateBoundingBox();
+	meshMap.emplace("BoxMesh", std::move(boxMesh));
 
-// 	Mesh QuadMesh;
-// 	QuadMesh.CreateQuad(-0.5f, 0.5f, 1.0f, 1.0f, 0.0f);
-// 	QuadMesh.meshName = "QuadMesh";
-// 	QuadMesh.GenerateBoundingBox();
-// 	meshMap.emplace("QuadMesh", std::move(QuadMesh));
+	Mesh screenQuadMesh;
+	screenQuadMesh.CreateQuad(-1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
+	screenQuadMesh.meshName = "ScreenQuadMesh";
+	screenQuadMesh.GenerateBoundingBox();
+	meshMap.emplace("ScreenQuadMesh", std::move(screenQuadMesh));
 
-	Mesh ScreenQuadMesh;
-	ScreenQuadMesh.CreateQuad(-1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
-	ScreenQuadMesh.meshName = "ScreenQuadMesh";
-	ScreenQuadMesh.GenerateBoundingBox();
-	meshMap.emplace("ScreenQuadMesh", std::move(ScreenQuadMesh));
+	Mesh sphereMesh;
+	sphereMesh.CreateSphere(0.5f, 20, 20);
+	sphereMesh.meshName = "SphereMesh";
+	sphereMesh.GenerateBoundingBox();
+	meshMap.emplace("SphereMesh", std::move(sphereMesh));
+
 }
 
 void MeshRepository::Unload()

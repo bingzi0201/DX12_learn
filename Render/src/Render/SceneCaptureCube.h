@@ -18,7 +18,6 @@ public:
 	UINT GetCubeMapSize() { return cubeMapSize; }
 
 private:
-
 	void SetViewportAndScissorRect(UINT cubeMapSize);
 
 private:

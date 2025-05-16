@@ -52,7 +52,7 @@ float3 SpecularGGX(float3 N, float3 L, float3 V, float Roughness, float3 F0)
 
 float3 DefaultBRDF(float3 LightDir, float3 Normal, float3 ViewDir, float Roughness, float Metallic, float3 BaseColor)
 {
-    float3 F0 = lerp(F0_DIELECTRIC.rrr, BaseColor.rgb, Metallic);
+    float3 F0 = lerp(float3(F0_DIELECTRIC, F0_DIELECTRIC, F0_DIELECTRIC), BaseColor.rgb, Metallic);
     
     // Base color remapping
     float3 DiffuseColor = (1.0 - Metallic) * BaseColor; // Metallic surfaces have no diffuse reflections
@@ -68,4 +68,24 @@ float3 DirectLighting(float3 Radiance, float3 LightDir, float3 Normal, float3 Vi
     float3 BRDF = DefaultBRDF(LightDir, Normal, ViewDir, Roughness, Metallic, BaseColor);
     float NoL = saturate(dot(Normal, LightDir));
     return Radiance * BRDF * NoL;
+}
+
+// for IBL, LUT parameters: a^2 and NdotV
+float3 EnvBRDF(float Metallic, float3 BaseColor, float2 LUT)
+{
+    float3 F0 = lerp(F0_DIELECTRIC.rrr, BaseColor.rgb, Metallic);
+    return F0 * LUT.x + LUT.y;
+}
+
+float3 AmbientLighting(float Metallic, float3 BaseColor, float3 Irradiance, float3 PrefilteredColor, float2 LUT, float AmbientAccess)
+{
+    // IBL diffuse   
+    float3 DiffuseColor = (1.0 - Metallic) * BaseColor; // Metallic surfaces have no diffuse reflections
+    float3 DiffuseContribution = DiffuseColor * Irradiance;
+    
+    // IBL specular
+    float3 SpecularContribution = PrefilteredColor * EnvBRDF(Metallic, BaseColor, LUT);
+
+    float3 Ambient = (DiffuseContribution + SpecularContribution) * AmbientAccess;
+    return Ambient;
 }

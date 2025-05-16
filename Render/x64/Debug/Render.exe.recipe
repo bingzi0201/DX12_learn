@@ -5,7 +5,11 @@
       <FullPath>G:\Render0314\trunk\Render\x64\Debug\Render.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
-  <ContentFiles />
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>G:\Render0314\trunk\Render\x64\Debug\IBLEnvironment.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
   <SatelliteDlls />
   <NonRecipeFileRefs />
 </Project>
