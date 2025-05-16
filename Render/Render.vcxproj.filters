@@ -198,6 +198,9 @@
     <ClCompile Include="src\Resource\D3D12RHI.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Actor\HDRSkyActor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\icon.ico">
@@ -524,6 +527,12 @@
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Actor\标头.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actor\HDRSkyActor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsl" />
@@ -537,10 +546,30 @@
     <None Include="Resources\Models\gun.fbx" />
     <None Include="Shaders\PostProcess.hlsl" />
     <None Include="Shaders\Primitive.hlsl" />
+    <None Include="Resource.aps" />
+    <None Include="Shaders\build_shaders.bat">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="Shaders\Compiled\BasePassDefaultPS.cso" />
+    <None Include="Shaders\Compiled\BasePassDefaultVS.cso" />
+    <None Include="Shaders\Compiled\DeferredLightingPS.cso" />
+    <None Include="Shaders\Compiled\DeferredLightingVS.cso" />
+    <None Include="Shaders\Compiled\IBLEnviromentPS.cso" />
+    <None Include="Shaders\Compiled\IBLEnviromentVS.cso" />
+    <None Include="Shaders\Compiled\PostProcess.cso" />
+    <None Include="Shaders\Compiled\PrimitivePS.cso" />
+    <None Include="Shaders\Compiled\PrimitiveVS.cso" />
+    <None Include="Shaders\IBLEnviroment.hlsl" />
+    <None Include="Shaders\IBLPrefilterEnv.hlsl" />
+    <None Include="Shaders\BasePassSky.hlsl" />
+    <None Include="Shaders\IBLIrradiance.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\IBLEnvironment.hlsl" />
   </ItemGroup>
 </Project>

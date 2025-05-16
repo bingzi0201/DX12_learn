@@ -1,6 +1,46 @@
 ﻿  ================================================
   Building shaders to "G:\Render0314\trunk\Render\Shaders\Compiled"
   ================================================
+  [IBLEnvironment] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\IBLEnvironmentVS.cso
+  [IBLEnvironment] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\IBLEnvironmentPS.cso
+  [IBLIrradiance] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\IBLIrradianceVS.cso
+  [IBLIrradiance] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\IBLIrradiancePS.cso
+  [IBLPrefilterEnv] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\IBLPrefilterEnvVS.cso
+  [IBLPrefilterEnv] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\IBLPrefilterEnvPS.cso
+  [BasePassSky] VS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\BasePassSkyVS.cso
+  [BasePassSky] PS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\BasePassSkyPS.cso
   [BasePassDefault] VS...
   Microsoft (R) Direct3D Shader Compiler 10.1
   Copyright (C) 2013 Microsoft. All rights reserved.
@@ -45,6 +85,5 @@ G:\Render0314\trunk\Render\Shaders\PostProcess.hlsl(52,27-49): warning X3571: po
   compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\PostProcess.cso
   
   All shaders compiled successfully.
-  Render.cpp
-G:\Render0314\trunk\Render\src\Render\Render.cpp(4,10): warning C4067: 预处理器指令后有意外标记 - 应输入换行符
+  TextureRepository.cpp
   Render.vcxproj -> G:\Render0314\trunk\Render\x64\Debug\Render.exe

@@ -80,6 +80,7 @@ private:
 	void CreateRenderResource();
 	void CreateNullDescriptors();
 	void CreateTextures();
+	void CreateSceneCaptureCube();  // for IBL
 	void CreateGBuffers();
 	void CreateColorTextures();
 	void CreateMeshProxys();
@@ -89,7 +90,15 @@ private:
 
 private:
 	void SetDescriptorHeaps();
-
+	// IBL
+	void GetSkyInfo();
+	void UpdateIBLEnviromentPassCB();
+	void CreateIBLEnviromentMap();
+	void UpdateIBLIrradiancePassCB();
+	void CreateIBLIrradianceMap();
+	void UpdateIBLPrefilterEnvCB();
+	void CreateIBLPrefilterEnvMap();
+	// mesh
 	void GatherAllMeshBatchs();
 	TMatrix TextureTransform();
  	void UpdateLightData();
@@ -116,6 +125,8 @@ private:
 	ID3D12GraphicsCommandList* d3dCommandList;
 
 	std::unique_ptr<ShaderResourceView> texture2DNullDescriptor = nullptr;
+	std::unique_ptr<ShaderResourceView> texture3DNullDescriptor = nullptr;
+	std::unique_ptr<ShaderResourceView> textureCubeNullDescriptor = nullptr;
 	std::unique_ptr<ShaderResourceView> structuredBufferNullDescriptor = nullptr;
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> FontHeap;
@@ -145,16 +156,26 @@ private:
 	InputLayoutManager inputLayoutManager;
 
 	// PassCB
+	ConstantBufferRef IBLEnviromentPassCBRef[6];
+	ConstantBufferRef IBLIrradiancePassCBRef[6];
+	const static UINT IBLPrefilterMaxMipLevel = 5;
+	ConstantBufferRef IBLPrefilterEnvPassCBRef[IBLPrefilterMaxMipLevel * 6];
 	ConstantBufferRef shadowPassCBRef = nullptr;
 	ConstantBufferRef basePassCBRef = nullptr;
 	ConstantBufferRef deferredLightPassCBRef;
 
 	// Global shader
+	std::unique_ptr<Shader> IBLEnvironmentShader = nullptr;
+	std::unique_ptr<Shader> IBLIrradianceShader = nullptr;
+	std::unique_ptr<Shader> IBLPrefilterEnvShader = nullptr;
 	std::unique_ptr<Shader> deferredLightingShader = nullptr;
 	std::unique_ptr<Shader> primitiveShader = nullptr;
 	std::unique_ptr<Shader> postProcessShader = nullptr;
 
 	// PSO
+	GraphicsPSODescriptor IBLEnvironmentPSODescriptor;
+	GraphicsPSODescriptor IBLIrradiancePSODescriptor;
+	GraphicsPSODescriptor IBLPrefilterEnvPSODescriptor;
 	std::unique_ptr<GraphicsPSOManager> graphicsPSOManager;
 	GraphicsPSODescriptor deferredLightingPSODescriptor;
 	GraphicsPSODescriptor postProcessPSODescriptor;
@@ -167,14 +188,19 @@ private:
 	// PrimitiveBatchs
 	std::unordered_map<GraphicsPSODescriptor, PrimitiveBatch> psoPrimitiveBatchMap;
 
-	// SpriteFont
-	std::unique_ptr<SpriteFont> spriteFont = nullptr;
-	const std::string FONT_TEXTURE_NAME = "FontTex";
-
 	// Light
 	StructuredBufferRef lightShaderParametersBuffer = nullptr;
 	ConstantBufferRef lightCommonDataBuffer = nullptr;
 	UINT lightCount = 0;
+
+	// hdrSky
+	MeshComponent* skyMeshComponent = nullptr;
+	std::string skyCubeTextureName;
+
+	// IBL
+	std::unique_ptr<SceneCaptureCube> IBLEnvironmentMap;
+	std::unique_ptr<SceneCaptureCube> IBLIrradianceMap;
+	std::vector<std::unique_ptr<SceneCaptureCube>> IBLPrefilterEnvMaps;
 
 	// Culling
 	bool bEnableFrustumCulling = false;
@@ -184,5 +210,7 @@ private:
 
 	// Render settings
 	TRenderSettings renderSettings;
+
+	bool bEnableIBLEnvLighting = false;
 };
 

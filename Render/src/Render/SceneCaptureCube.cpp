@@ -5,6 +5,7 @@ SceneCaptureCube::SceneCaptureCube(bool renderDepth, UINT Size, DXGI_FORMAT form
 {
 	d3d12RHI = inD3D12RHI;
 	RTCube = std::make_unique<RenderTargetCube>(d3d12RHI, renderDepth, cubeMapSize, format);
+	assert(RTCube && "RenderTargetCube create failed!");
 	SetViewportAndScissorRect(cubeMapSize);
 }
 

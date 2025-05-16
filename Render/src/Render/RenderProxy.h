@@ -111,3 +111,10 @@ struct ObjectConstants
 	TMatrix PrevWorld = TMatrix::Identity;
 	TMatrix TexTransform = TMatrix::Identity;
 };
+
+struct PrefilterEnvironmentConstant
+{
+	TMatrix view = TMatrix::Identity;
+	TMatrix proj = TMatrix::Identity;
+	float roughness;
+};

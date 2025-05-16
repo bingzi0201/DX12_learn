@@ -1,4 +1,5 @@
 #include "Render.h"
+#include "../Actor/HDRSkyActor.h"
 #include "../Actor/CameraActor.h"
 #include "../Actor/Light/DirectionalLightActor.h"
 #include "../Actor/Light/PointLightActor.h"*
@@ -106,6 +107,14 @@ void Render::CreateRenderResource()
 
 	CreateNullDescriptors();
 	CreateTextures();
+	GetSkyInfo();
+
+	if (skyMeshComponent)
+	{
+		bEnableIBLEnvLighting = true;
+		CreateSceneCaptureCube();
+	}
+
 	CreateMeshProxys();
 	CreateInputLayouts();
 	CreateGlobalShaders();
@@ -120,26 +129,43 @@ void Render::CreateRenderResource()
 void Render::CreateNullDescriptors()
 {
 	{
-		D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
-		SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		SrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
-		texture2DNullDescriptor = std::make_unique<ShaderResourceView>(d3d12RHI->GetDevice(), SrvDesc, nullptr);
+		texture2DNullDescriptor = std::make_unique<ShaderResourceView>(d3d12RHI->GetDevice(), srvDesc, nullptr);
 	}
 
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
+
+		texture3DNullDescriptor = std::make_unique<ShaderResourceView>(d3d12RHI->GetDevice(), srvDesc, nullptr);
+	}
 
 	{
-		D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
-		SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-		SrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-		SrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-		SrvDesc.Buffer.StructureByteStride = 1;
-		SrvDesc.Buffer.NumElements = 1;
-		SrvDesc.Buffer.FirstElement = 0;
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 
-		structuredBufferNullDescriptor = std::make_unique<ShaderResourceView>(d3d12RHI->GetDevice(), SrvDesc, nullptr);
+		textureCubeNullDescriptor = std::make_unique<ShaderResourceView>(d3d12RHI->GetDevice(), srvDesc, nullptr);
+	}
+
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		srvDesc.Buffer.StructureByteStride = 1;
+		srvDesc.Buffer.NumElements = 1;
+		srvDesc.Buffer.FirstElement = 0;
+
+		structuredBufferNullDescriptor = std::make_unique<ShaderResourceView>(d3d12RHI->GetDevice(), srvDesc, nullptr);
 	}
 }
 
@@ -152,6 +178,24 @@ void Render::CreateTextures()
 	{
 		TexturePair.second->LoadTextureResourceFromFlie(d3d12RHI);
 		TexturePair.second->CreateTexture(d3d12RHI);
+	}
+}
+
+void Render::CreateSceneCaptureCube()
+{
+	IBLEnvironmentMap = std::make_unique<SceneCaptureCube>(false, 512, DXGI_FORMAT_R32G32B32A32_FLOAT, d3d12RHI);
+	IBLEnvironmentMap->CreatePerspectiveViews({ 0.0f, 0.0f, 0.0f }, 0.1f, 10.0f);
+
+	IBLIrradianceMap = std::make_unique<SceneCaptureCube>(false, 32, DXGI_FORMAT_R32G32B32A32_FLOAT, d3d12RHI);
+	IBLIrradianceMap->CreatePerspectiveViews({ 0.0f, 0.0f, 0.0f }, 0.1f, 10.0f);
+
+	for (UINT mip = 0; mip < IBLPrefilterMaxMipLevel; mip++)
+	{
+		UINT mipWidth = UINT(128 * std::pow(0.5, mip));
+		auto prefilterEnvMap = std::make_unique<SceneCaptureCube>(false, mipWidth, DXGI_FORMAT_R16G16B16A16_FLOAT, d3d12RHI);
+		prefilterEnvMap->CreatePerspectiveViews({ 0.0f, 0.0f, 0.0f }, 0.1f, 10.0f);
+
+		IBLPrefilterEnvMaps.push_back(std::move(prefilterEnvMap));
 	}
 }
 
@@ -287,6 +331,35 @@ void Render::CreateInputLayouts()
 
 void Render::CreateGlobalShaders()
 {
+	// IBL
+	if (bEnableIBLEnvLighting)
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "IBLEnvironment";
+		shaderInfo.fileName = "IBLEnvironment";
+		shaderInfo.bCreateVS = true;
+		shaderInfo.bCreatePS = true;
+		IBLEnvironmentShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+	if (bEnableIBLEnvLighting)
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "IBLIrradiance";
+		shaderInfo.fileName = "IBLIrradiance";
+		shaderInfo.bCreateVS = true;
+		shaderInfo.bCreatePS = true;
+		IBLIrradianceShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+	if (bEnableIBLEnvLighting)
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "IBLPrefilterEnv";
+		shaderInfo.fileName = "IBLPrefilterEnv";
+		shaderInfo.bCreateVS = true;
+		shaderInfo.bCreatePS = true;
+		IBLPrefilterEnvShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+
 	{
 		ShaderInfo shaderInfo;
 		shaderInfo.shaderName = "DeferredLighting";
@@ -318,6 +391,51 @@ void Render::CreateGlobalShaders()
 
 void Render::CreateGlobalPSO()
 {
+	// IBLEnvironmentPSODescriptor
+	if (bEnableIBLEnvLighting)
+	{
+		IBLEnvironmentPSODescriptor.inputLayoutName = std::string("DefaultInputLayout");
+		IBLEnvironmentPSODescriptor.shader = IBLEnvironmentShader.get();
+		IBLEnvironmentPSODescriptor.RTVFormats[0] = IBLEnvironmentMap->GetRTCube()->GetFormat();
+		IBLEnvironmentPSODescriptor.numRenderTargets = 1;
+		// The camera is inside the cube, so just turn off culling.
+		IBLEnvironmentPSODescriptor.rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+		IBLEnvironmentPSODescriptor.depthStencilDesc.DepthEnable = false;
+		IBLEnvironmentPSODescriptor.depthStencilFormat = DXGI_FORMAT_UNKNOWN;
+
+		graphicsPSOManager->TryCreatePSO(IBLEnvironmentPSODescriptor);
+	}
+
+	// IBLIrradiance PSO
+	if (bEnableIBLEnvLighting)
+	{
+		IBLIrradiancePSODescriptor.inputLayoutName = std::string("DefaultInputLayout");
+		IBLIrradiancePSODescriptor.shader = IBLIrradianceShader.get();
+		IBLIrradiancePSODescriptor.RTVFormats[0] = IBLIrradianceMap->GetRTCube()->GetFormat();
+		IBLIrradiancePSODescriptor.numRenderTargets = 1;
+		// The camera is inside the cube, so just turn off culling.
+		IBLIrradiancePSODescriptor.rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+		IBLIrradiancePSODescriptor.depthStencilDesc.DepthEnable = false;
+		IBLIrradiancePSODescriptor.depthStencilFormat = DXGI_FORMAT_UNKNOWN;
+
+		graphicsPSOManager->TryCreatePSO(IBLIrradiancePSODescriptor);
+	}
+
+	// IBLPrefilterEnv PSO
+	if (bEnableIBLEnvLighting)
+	{
+		IBLPrefilterEnvPSODescriptor.inputLayoutName = std::string("DefaultInputLayout");
+		IBLPrefilterEnvPSODescriptor.shader = IBLPrefilterEnvShader.get();
+		IBLPrefilterEnvPSODescriptor.RTVFormats[0] = IBLPrefilterEnvMaps[0]->GetRTCube()->GetFormat();
+		IBLPrefilterEnvPSODescriptor.numRenderTargets = 1;
+		// The camera is inside the cube, so just turn off culling.
+		IBLPrefilterEnvPSODescriptor.rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+		IBLPrefilterEnvPSODescriptor.depthStencilDesc.DepthEnable = false;
+		IBLPrefilterEnvPSODescriptor.depthStencilFormat = DXGI_FORMAT_UNKNOWN;
+
+		graphicsPSOManager->TryCreatePSO(IBLPrefilterEnvPSODescriptor);
+	}
+
 	// DeferredLighting
 	{
 		D3D12_DEPTH_STENCIL_DESC lightPassDSD;
@@ -383,6 +501,14 @@ void Render::Draw(const GameTimer& gt)
 	d3d12RHI->ResetCommandList();
 
 	SetDescriptorHeaps();
+
+	if (bEnableIBLEnvLighting && frameCount == 0)
+	{
+		CreateIBLEnviromentMap();
+ 		CreateIBLIrradianceMap();
+ 		CreateIBLPrefilterEnvMap();
+	}
+
 	GatherAllMeshBatchs();
 	UpdateLightData();
 	BasePass();
@@ -398,7 +524,6 @@ void Render::Draw(const GameTimer& gt)
 void Render::EndFrame()
 {
 	d3d12RHI->EndFrame();
-
 	frameCount++;
 }
 
@@ -407,6 +532,251 @@ void Render::SetDescriptorHeaps()
 	auto cacheCbvSrvUavDescriptorHeap = d3d12RHI->GetDevice()->GetCommandContext()->GetDescriptorCache()->GetCacheCbvSrvUavDescriptorHeap();
 	ID3D12DescriptorHeap* d3dDescriptorHeaps[] = { cacheCbvSrvUavDescriptorHeap.Get() };
 	d3dCommandList->SetDescriptorHeaps(1, d3dDescriptorHeaps);
+}
+
+void Render::GetSkyInfo()
+{
+	auto hdrSkyActors = world->GetAllActorsOfClass<HDRSkyActor>();
+
+	if (hdrSkyActors.size() > 0)
+	{
+		assert(hdrSkyActors.size() == 1);
+		auto hdrSky = hdrSkyActors[0];
+		skyMeshComponent = hdrSky->meshComponent;
+		skyCubeTextureName = skyMeshComponent->GetMaterialInstance()->parameters.textureMap["SkyCubeTexture"];
+	}
+}
+
+void Render::UpdateIBLEnviromentPassCB()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		TMatrix view = IBLEnvironmentMap->GetSceneView(i).view;
+		TMatrix proj = IBLEnvironmentMap->GetSceneView(i).proj;
+
+		PassConstants passCB;
+		passCB.View = view.Transpose();
+		passCB.Proj = proj.Transpose();
+
+		IBLEnviromentPassCBRef[i] = d3d12RHI->CreateConstantBuffer(&passCB, sizeof(passCB));
+	}
+}
+
+void Render::CreateIBLEnviromentMap()
+{
+	UpdateIBLEnviromentPassCB();
+
+	d3d12RHI->TransitionResource(IBLEnvironmentMap->GetRTCube()->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	// Set viewport
+	auto viewport = IBLEnvironmentMap->GetViewport();
+	auto rect = IBLEnvironmentMap->GetScissorRect();
+	d3dCommandList->RSSetViewports(1, &viewport);
+	d3dCommandList->RSSetScissorRects(1, &rect);
+
+	// Set PSO
+	d3dCommandList->SetPipelineState(graphicsPSOManager->GetPSO(IBLEnvironmentPSODescriptor));
+
+	// Set RootSignature
+	Shader* shader = IBLEnvironmentPSODescriptor.shader;
+	d3dCommandList->SetGraphicsRootSignature(shader->rootSignature.Get());
+
+	for (UINT i = 0; i < 6; i++)
+	{
+		// Set renderTarget
+		auto RTV = IBLEnvironmentMap->GetRTCube()->GetRTV(i);
+		float* clearValue = IBLEnvironmentMap->GetRTCube()->GetClearColorPtr();
+		auto descHandle = RTV->GetDescriptorHandle();
+		d3dCommandList->ClearRenderTargetView(RTV->GetDescriptorHandle(), clearValue, 0, nullptr);
+		d3dCommandList->OMSetRenderTargets(1, &descHandle, true, nullptr);
+
+		// Draw Box
+		{
+			shader->SetParameter("cbPass", IBLEnviromentPassCBRef[i]);
+
+			auto& textureMap = TextureRepository::Get().textureMap;
+			auto equirectangularSRV = textureMap[skyCubeTextureName]->GetD3DTexture()->GetSRV();
+			shader->SetParameter("EquirectangularMap", equirectangularSRV);
+
+			// Bind paramters
+			shader->BindParameters();
+
+			const MeshProxy& meshProxy = meshProxyMap.at("BoxMesh");
+
+			// Set vertex buffer
+			d3d12RHI->SetVertexBuffer(meshProxy.vertexBufferRef, 0, meshProxy.vertexByteStride, meshProxy.vertexBufferByteSize);
+
+			// Set index buffer
+			d3d12RHI->SetIndexBuffer(meshProxy.indexBufferRef, 0, meshProxy.indexFormat, meshProxy.indexBufferByteSize);
+
+			D3D12_PRIMITIVE_TOPOLOGY primitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+			d3dCommandList->IASetPrimitiveTopology(primitiveType);
+
+			// Draw 
+			auto& SubMesh = meshProxy.subMeshs.at("Default");
+			d3dCommandList->DrawIndexedInstanced(SubMesh.indexCount, 1, SubMesh.startIndexLocation, SubMesh.baseVertexLocation, 0);
+		}
+	}
+
+	// Change back to GENERIC_READ so we can read the texture in a shader.
+	d3d12RHI->TransitionResource(IBLEnvironmentMap->GetRTCube()->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+}
+
+void Render::UpdateIBLIrradiancePassCB()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		TMatrix view = IBLIrradianceMap->GetSceneView(i).view;
+		TMatrix proj = IBLIrradianceMap->GetSceneView(i).proj;
+
+		PassConstants PassCB;
+		PassCB.View = view.Transpose();
+		PassCB.Proj = proj.Transpose();
+
+		IBLIrradiancePassCBRef[i] = d3d12RHI->CreateConstantBuffer(&PassCB, sizeof(PassCB));
+	}
+}
+
+void Render::CreateIBLIrradianceMap()
+{
+	UpdateIBLIrradiancePassCB();
+
+	d3d12RHI->TransitionResource(IBLIrradianceMap->GetRTCube()->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	// Set viewport
+	auto viewport = IBLIrradianceMap->GetViewport();
+	auto rect = IBLIrradianceMap->GetScissorRect();
+	d3dCommandList->RSSetViewports(1, &viewport);
+	d3dCommandList->RSSetScissorRects(1, &rect);
+
+	// Set PSO
+	d3dCommandList->SetPipelineState(graphicsPSOManager->GetPSO(IBLIrradiancePSODescriptor));
+
+	// Set RootSignature
+	Shader* shader = IBLIrradiancePSODescriptor.shader;
+	d3dCommandList->SetGraphicsRootSignature(shader->rootSignature.Get()); //should before binding
+
+	for (UINT i = 0; i < 6; i++)
+	{
+		// Set renderTarget
+		auto RTV = IBLIrradianceMap->GetRTCube()->GetRTV(i);
+		float* ClearValue = IBLIrradianceMap->GetRTCube()->GetClearColorPtr();
+		auto descHandle = RTV->GetDescriptorHandle();
+		d3dCommandList->ClearRenderTargetView(RTV->GetDescriptorHandle(), ClearValue, 0, nullptr);
+		d3dCommandList->OMSetRenderTargets(1, &descHandle, true, nullptr);
+
+		// Draw Box
+		{
+			shader->SetParameter("cbPass", IBLIrradiancePassCBRef[i]);
+
+			ShaderResourceView* environmentSRV = IBLEnvironmentMap->GetRTCube()->GetSRV();
+			shader->SetParameter("EnvironmentMap", environmentSRV);
+
+			// Bind paramters
+			shader->BindParameters();
+
+			const MeshProxy& meshProxy = meshProxyMap.at("BoxMesh");
+
+			// Set vertex buffer 
+			d3d12RHI->SetVertexBuffer(meshProxy.vertexBufferRef, 0, meshProxy.vertexByteStride, meshProxy.vertexBufferByteSize);
+
+			// Set index buffer
+			d3d12RHI->SetIndexBuffer(meshProxy.indexBufferRef, 0, meshProxy.indexFormat, meshProxy.indexBufferByteSize);
+
+			D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+			d3dCommandList->IASetPrimitiveTopology(PrimitiveType);
+
+			// Draw 
+			auto& SubMesh = meshProxy.subMeshs.at("Default");
+			d3dCommandList->DrawIndexedInstanced(SubMesh.indexCount, 1, SubMesh.startIndexLocation, SubMesh.baseVertexLocation, 0);
+		}
+	}
+
+	// Change back to GENERIC_READ so we can read the texture in a shader.
+	d3d12RHI->TransitionResource(IBLIrradianceMap->GetRTCube()->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+}
+
+void Render::UpdateIBLPrefilterEnvCB()
+{
+	for (UINT mip = 0; mip < IBLPrefilterMaxMipLevel; mip++)
+	{
+		float roughness = (float)mip / (float)(IBLPrefilterMaxMipLevel - 1);
+
+		for (UINT i = 0; i < 6; i++)
+		{
+			TMatrix view = IBLPrefilterEnvMaps[mip]->GetSceneView(i).view;
+			TMatrix proj = IBLPrefilterEnvMaps[mip]->GetSceneView(i).proj;
+
+			PrefilterEnvironmentConstant passCB;
+			passCB.view = view.Transpose();
+			passCB.proj = proj.Transpose();
+			passCB.roughness = roughness;
+
+			IBLPrefilterEnvPassCBRef[mip * 6 + i] = d3d12RHI->CreateConstantBuffer(&passCB, sizeof(passCB));
+		}
+	}
+}
+
+void Render::CreateIBLPrefilterEnvMap()
+{
+	UpdateIBLPrefilterEnvCB();
+
+	for (UINT mip = 0; mip < IBLPrefilterMaxMipLevel; mip++)
+	{
+		d3d12RHI->TransitionResource(IBLPrefilterEnvMaps[mip]->GetRTCube()->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+		// Set viewport
+		auto viewport = IBLPrefilterEnvMaps[mip]->GetViewport();
+		auto rect = IBLPrefilterEnvMaps[mip]->GetScissorRect();
+		d3dCommandList->RSSetViewports(1, &viewport);
+		d3dCommandList->RSSetScissorRects(1, &rect);
+
+		// Set PSO
+		d3dCommandList->SetPipelineState(graphicsPSOManager->GetPSO(IBLPrefilterEnvPSODescriptor));
+
+		// Set RootSignature
+		d3dCommandList->SetGraphicsRootSignature(IBLPrefilterEnvShader->rootSignature.Get()); //should before binding	
+
+		for (UINT i = 0; i < 6; i++)
+		{
+			// Set renderTarget
+			auto RTV = IBLPrefilterEnvMaps[mip]->GetRTCube()->GetRTV(i);
+			float* ClearValue = IBLPrefilterEnvMaps[mip]->GetRTCube()->GetClearColorPtr();
+			auto descHandle = RTV->GetDescriptorHandle();
+			d3dCommandList->ClearRenderTargetView(RTV->GetDescriptorHandle(), ClearValue, 0, nullptr);
+			d3dCommandList->OMSetRenderTargets(1, &descHandle, true, nullptr);
+
+			// Draw Box
+			{
+				IBLPrefilterEnvShader->SetParameter("cbPrefilterEnvPass", IBLPrefilterEnvPassCBRef[mip * 6 + i]);
+
+
+				ShaderResourceView* environmentSRV = IBLEnvironmentMap->GetRTCube()->GetSRV();
+				IBLPrefilterEnvShader->SetParameter("EnvironmentMap", environmentSRV);
+
+				// Bind paramters
+				IBLPrefilterEnvShader->BindParameters();
+
+				const MeshProxy& meshProxy = meshProxyMap.at("BoxMesh");
+
+				// Set vertex buffer
+				d3d12RHI->SetVertexBuffer(meshProxy.vertexBufferRef, 0, meshProxy.vertexByteStride, meshProxy.vertexBufferByteSize);
+
+				// Set index buffer
+				d3d12RHI->SetIndexBuffer(meshProxy.indexBufferRef, 0, meshProxy.indexFormat, meshProxy.indexBufferByteSize);
+
+				D3D12_PRIMITIVE_TOPOLOGY primitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+				d3dCommandList->IASetPrimitiveTopology(primitiveType);
+
+				// Draw 
+				auto& SubMesh = meshProxy.subMeshs.at("Default");
+				d3dCommandList->DrawIndexedInstanced(SubMesh.indexCount, 1, SubMesh.startIndexLocation, SubMesh.baseVertexLocation, 0);
+			}
+		}
+
+		// Change back to GENERIC_READ so we can read the texture in a shader.
+		d3d12RHI->TransitionResource(IBLPrefilterEnvMaps[mip]->GetRTCube()->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
 }
 
 void Render::GatherAllMeshBatchs()
@@ -589,9 +959,29 @@ void Render::UpdateLightData()
 		lightShaderParametersBuffer = nullptr;
 	}
 
+	//---------------------------IBL ambient Light----------------------------------------------------------//	
+	if (bEnableIBLEnvLighting)
+	{
+		LightShaderParameters lightShaderParameter;
+		lightShaderParameter.lightType = ELightType::AmbientLight;
+		lightShaderParametersArray.push_back(lightShaderParameter);
+	}
+
+	lightCount = (UINT)lightShaderParametersArray.size();
+	if (lightCount > 0)
+	{
+		lightShaderParametersBuffer = d3d12RHI->CreateStructuredBuffer(lightShaderParametersArray.data(),
+			(uint32_t)(sizeof(LightShaderParameters)), (uint32_t)(lightShaderParametersArray.size()));
+	}
+	else
+	{
+		lightShaderParametersBuffer = nullptr;
+	}
+
 	LightCommonData lightCommonData;
 	lightCommonData.lightCount = lightCount;
 	lightCommonDataBuffer = d3d12RHI->CreateConstantBuffer(&lightCommonData, sizeof(lightCommonData));
+
 }
 
 void Render::UpdateBasePassCB()
@@ -661,7 +1051,14 @@ void Render::GetBasePassMeshCommandMap()
 			std::string TextureName = Pair.second;
 			ShaderResourceView* SRV = nullptr;
 
-			SRV = TextureRepository::Get().textureMap[TextureName]->GetD3DTexture()->GetSRV();
+			if (TextureName == skyCubeTextureName)
+			{
+				SRV = IBLEnvironmentMap->GetRTCube()->GetSRV();
+			}
+			else
+			{
+				SRV = TextureRepository::Get().textureMap[TextureName]->GetD3DTexture()->GetSRV();
+			}
 
 			meshCommand.SetShaderParameter(Pair.first, SRV);
 		}
@@ -748,6 +1145,7 @@ void Render::BasePass()
 	// Draw all mesh
 	for (const auto& Pair : baseMeshCommandMap)
 	{
+
 		const GraphicsPSODescriptor& PSODescriptor = Pair.first;
 		const MeshCommandList& meshCommandList = Pair.second;
 
@@ -1143,6 +1541,33 @@ void Render::DeferredLightingPass()
 	else
 	{
 		shader->SetParameter("Lights", structuredBufferNullDescriptor.get());
+	}
+
+	if (bEnableIBLEnvLighting)
+	{
+		shader->SetParameter("IBLIrradianceMap", IBLIrradianceMap->GetRTCube()->GetSRV());
+
+		auto BRDFIntegrationMapSRV = textureMap["IBL_BRDF_LUT"]->GetD3DTexture()->GetSRV();
+		shader->SetParameter("BrdfLUT", BRDFIntegrationMapSRV);
+
+		std::vector<ShaderResourceView*> IBLPrefilterEnvMapSRVs;
+		for (UINT i = 0; i < IBLPrefilterMaxMipLevel; i++)
+		{
+			IBLPrefilterEnvMapSRVs.push_back(IBLPrefilterEnvMaps[i]->GetRTCube()->GetSRV());
+		}
+		shader->SetParameter("IBLPrefilterEnvMaps", IBLPrefilterEnvMapSRVs);
+	}
+	else
+	{
+		shader->SetParameter("IBLIrradianceMap", textureCubeNullDescriptor.get());
+		shader->SetParameter("BrdfLUT", texture2DNullDescriptor.get());
+
+		std::vector<ShaderResourceView*> NullSRVs;
+		for (UINT i = 0; i < IBLPrefilterMaxMipLevel; i++)
+		{
+			NullSRVs.push_back(textureCubeNullDescriptor.get());
+		}
+		shader->SetParameter("IBLPrefilterEnvMaps", NullSRVs);
 	}
 
 	//-------------------------------------------------------------------------------------------
