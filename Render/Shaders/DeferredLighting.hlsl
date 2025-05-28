@@ -87,7 +87,7 @@ float4 PS(VertexOut pin) : SV_TARGET
         
         // PrefilteredColor
         float3 ReflectDir = reflect(-ViewDir, Normal);
-        float3 PrefilteredColor = GetPrefilteredColor(Roughness, ReflectDir);
+        float3 PrefilteredColor = GetPrefilteredColor(0.5f, ReflectDir);
         //return float4(PrefilteredColor, 1.0f);
             
         // LUT value

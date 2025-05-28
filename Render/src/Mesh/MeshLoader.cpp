@@ -104,7 +104,7 @@ bool MeshLoader::ProcessMesh(const aiMesh* assimpMesh, Mesh& mesh, const aiMatri
 		// UV
 		if (assimpMesh->HasTextureCoords(0)) {
 			vertex.texcoord.x = assimpMesh->mTextureCoords[0][v].x;
-			vertex.texcoord.y = 1.0f - assimpMesh->mTextureCoords[0][v].y; // invert v coordinate
+			vertex.texcoord.y = assimpMesh->mTextureCoords[0][v].y;
 		}
 
 		mesh.vertices.push_back(vertex);

@@ -34,6 +34,17 @@ void MaterialRepository::Load()
 		}
 
 		{
+			MaterialInstance* gunMatInst = CreateMaterialInstance(defaultMat, "SphereInst");
+
+			MaterialParameters& parameters = gunMatInst->parameters;
+			parameters.emissiveColor = TVector3(1.0f);
+			gunMatInst->SetTextureParamter("BaseColorTexture", "white1x1");
+			gunMatInst->SetTextureParamter("NormalTexture", "white1x1");
+			gunMatInst->SetTextureParamter("MetallicTexture", "white1x1");
+			gunMatInst->SetTextureParamter("RoughnessTexture", "white1x1");
+		}
+
+		{
 			MaterialInstance* emissiveMatInst = CreateMaterialInstance(defaultMat, "EmissiveMatInst");
 
 			MaterialParameters& parameters = emissiveMatInst->parameters;
@@ -53,7 +64,7 @@ void MaterialRepository::Load()
 		Material* enviromentMat = CreateMaterial("HDRSkyMat", "BasePassSky");
 
 		MaterialParameters& parameters = enviromentMat->parameters;
-		parameters.textureMap.emplace("SkyCubeTexture", "bloem_hill");
+		parameters.textureMap.emplace("SkyCubeTexture", "poolbeg_2k");
 
 		MaterialRenderState& renderState = enviromentMat->renderState;
 		renderState.cullMode = D3D12_CULL_MODE_NONE;
