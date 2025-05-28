@@ -1,6 +1,67 @@
 ﻿  ================================================
   Building shaders to "G:\Render0314\trunk\Render\Shaders\Compiled"
   ================================================
+  [EnviromentCDF - LocalCondCDFCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+G:\Render0314\trunk\Render\Shaders\LocalCondCDF.hlsl(22,20-32): warning X3203: signed/unsigned mismatch, unsigned assumed
+G:\Render0314\trunk\Render\Shaders\LocalCondCDF.hlsl(22,37-50): warning X3203: signed/unsigned mismatch, unsigned assumed
+G:\Render0314\trunk\Render\Shaders\LocalCondCDF.hlsl(28,16-47): warning X3206: implicit truncation of vector type
+G:\Render0314\trunk\Render\Shaders\LocalCondCDF.hlsl(43,13-27): warning X3203: signed/unsigned mismatch, unsigned assumed
+G:\Render0314\trunk\Render\Shaders\LocalCondCDF.hlsl(53,24-33): warning X3556: integer divides may be much slower, try using uints if possible.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\LocalCondCDFCS.cso
+  [EnviromentCDF - GlobalCondCDFCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\GlobalCondCDFCS.cso
+  [EnviromentCDF - BroadcastConCDF] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+G:\Render0314\trunk\Render\Shaders\BroadcastConCDF.hlsl(20,20-29): warning X3556: integer divides may be much slower, try using uints if possible.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\BroadcastConCDFCS.cso
+  [EnviromentCDF - LocalEdgeCDFCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+G:\Render0314\trunk\Render\Shaders\LocalEdgeCDF.hlsl(40,13-27): warning X3203: signed/unsigned mismatch, unsigned assumed
+G:\Render0314\trunk\Render\Shaders\LocalEdgeCDF.hlsl(20,23-32): warning X3556: integer divides may be much slower, try using uints if possible.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\LocalEdgeCDFCS.cso
+  [EnviromentCDF - GlobalEdgeCDFCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+G:\Render0314\trunk\Render\Shaders\GlobalEdgeCDF.hlsl(19,9-31): warning X3203: signed/unsigned mismatch, unsigned assumed
+G:\Render0314\trunk\Render\Shaders\GlobalEdgeCDF.hlsl(33,13-27): warning X3203: signed/unsigned mismatch, unsigned assumed
+G:\Render0314\trunk\Render\Shaders\GlobalEdgeCDF.hlsl(33,32-54): warning X3203: signed/unsigned mismatch, unsigned assumed
+G:\Render0314\trunk\Render\Shaders\GlobalEdgeCDF.hlsl(40,9-31): warning X3203: signed/unsigned mismatch, unsigned assumed
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\GlobalEdgeCDFCS.cso
+  [IntegrateCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\IntegrateCS.cso
+  [VarianceCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\VarianceCS.cso
+  [TemporalAccumCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\TemporalAccumCS.cso
+  [SVGFSpatFilterCS] CS...
+  Microsoft (R) Direct3D Shader Compiler 10.1
+  Copyright (C) 2013 Microsoft. All rights reserved.
+  
+  compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\SVGFSpatFilterCS.cso
   [IBLEnvironment] VS...
   Microsoft (R) Direct3D Shader Compiler 10.1
   Copyright (C) 2013 Microsoft. All rights reserved.
@@ -85,5 +146,4 @@ G:\Render0314\trunk\Render\Shaders\PostProcess.hlsl(52,27-49): warning X3571: po
   compilation object save succeeded; see G:\Render0314\trunk\Render\Shaders\Compiled\PostProcess.cso
   
   All shaders compiled successfully.
-  TextureRepository.cpp
   Render.vcxproj -> G:\Render0314\trunk\Render\x64\Debug\Render.exe

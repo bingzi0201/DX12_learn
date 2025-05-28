@@ -87,6 +87,8 @@ private:
 	void CreateInputLayouts();
 	void CreateGlobalShaders();
 	void CreateGlobalPSO();
+	void CreateComputePSO();
+	void CreateComputeShaderResource();   // TODO
 
 private:
 	void SetDescriptorHeaps();
@@ -98,6 +100,13 @@ private:
 	void CreateIBLIrradianceMap();
 	void UpdateIBLPrefilterEnvCB();
 	void CreateIBLPrefilterEnvMap();
+	// Monte Carlo
+	void CreateEnviromentCDF();
+	void IntegratePass();
+	// TAA
+	void TemporalAccumPass();
+	// SVGF
+	void SVGFSpatFilterPass();
 	// mesh
 	void GatherAllMeshBatchs();
 	TMatrix TextureTransform();
@@ -171,6 +180,17 @@ private:
 	std::unique_ptr<Shader> deferredLightingShader = nullptr;
 	std::unique_ptr<Shader> primitiveShader = nullptr;
 	std::unique_ptr<Shader> postProcessShader = nullptr;
+	// Mento Carlo shader
+	std::unique_ptr<Shader> localCondCDFShader = nullptr;       // for EnvCDF
+	std::unique_ptr<Shader> globalCondCDFShader = nullptr;       // for EnvCDF
+	std::unique_ptr<Shader> broadcastCondCDFShader = nullptr;       // for EnvCDF
+	std::unique_ptr<Shader> localEdgeCDFShader = nullptr;       // for EnvCDF
+	std::unique_ptr<Shader> globalEdgeCDFShader = nullptr;       // for EnvCDF
+	std::unique_ptr<Shader> resultCDFShader = nullptr;       // for EnvCDF
+	std::unique_ptr<Shader> IntegrateShader = nullptr;
+	std::unique_ptr<Shader> temporalAccumShader = nullptr;
+	std::unique_ptr<Shader> SVGFSpatFilterShader = nullptr;
+	std::unique_ptr<Shader> varianceShader = nullptr;
 
 	// PSO
 	GraphicsPSODescriptor IBLEnvironmentPSODescriptor;
@@ -179,6 +199,18 @@ private:
 	std::unique_ptr<GraphicsPSOManager> graphicsPSOManager;
 	GraphicsPSODescriptor deferredLightingPSODescriptor;
 	GraphicsPSODescriptor postProcessPSODescriptor;
+	// Mento Carlo PSO
+	std::unique_ptr<ComputePSOManager> computePSOManager;
+	ComputePSODescriptor localCondCDFPSODescriptor;             // for EnvCDF
+	ComputePSODescriptor globalCondCDFPSODescriptor;             // for EnvCDF
+	ComputePSODescriptor broadcastCondCDFPSODescriptor;             // for EnvCDF
+	ComputePSODescriptor localEdgeCDFPSODescriptor;             // for EnvCDF
+	ComputePSODescriptor globalEdgeCDFPSODescriptor;             // for EnvCDF
+	ComputePSODescriptor resultCDFPSODescriptor;             // for EnvCDF
+	ComputePSODescriptor integratePSODescriptor;
+	ComputePSODescriptor temporalAccumPSODescriptor;
+	ComputePSODescriptor SVGFSpatFilterPSODescriptor;
+	ComputePSODescriptor variancePSODescriptor;
 
 	// MeshBatch and MeshCommand
 	std::vector<MeshBatch> meshBatchs;
@@ -201,6 +233,10 @@ private:
 	std::unique_ptr<SceneCaptureCube> IBLEnvironmentMap;
 	std::unique_ptr<SceneCaptureCube> IBLIrradianceMap;
 	std::vector<std::unique_ptr<SceneCaptureCube>> IBLPrefilterEnvMaps;
+
+	// Monte Carlo
+	D3D12TextureRef enviromentCDFTex0;
+	D3D12TextureRef enviromentCDFTex1;
 
 	// Culling
 	bool bEnableFrustumCulling = false;

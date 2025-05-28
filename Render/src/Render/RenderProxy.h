@@ -35,6 +35,14 @@ struct SubmeshProxy
 	DirectX::BoundingBox bounds;
 };
 
+struct CB_EnvCDF
+{
+	UINT width;
+	UINT height;
+	UINT groupsPerRow;
+	UINT groupsPerColumn;
+};
+
 struct MeshProxy
 {
 	// Give it a name so we can look it up by name.

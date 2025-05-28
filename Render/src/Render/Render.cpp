@@ -44,6 +44,7 @@ bool Render::Initialize(int windowWidth, int windowHeight, D3D12RHI* inD3D12RHI,
 	d3dCommandList = d3d12RHI->GetDevice()->GetCommandList();
 
 	graphicsPSOManager = std::make_unique<GraphicsPSOManager>(d3d12RHI, &inputLayoutManager);
+	computePSOManager = std::make_unique<ComputePSOManager>(d3d12RHI);
 
 	// Do the initial resize code.
 	OnResize(windowWidth, windowHeight);
@@ -71,7 +72,7 @@ void Render::OnResize(int NewWidth, int NewHeight)
 	// Resize GBuffers
 	CreateGBuffers();
 	CreateColorTextures();
-
+	CreateComputeShaderResource();
 }
 
 float Render::AspectRatio()const
@@ -119,6 +120,7 @@ void Render::CreateRenderResource()
 	CreateInputLayouts();
 	CreateGlobalShaders();
 	CreateGlobalPSO();
+	CreateComputePSO();
 
 	// Execute the initialization commands.
 	d3d12RHI->ExecuteCommandLists();
@@ -387,6 +389,84 @@ void Render::CreateGlobalShaders()
 		postProcessShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
 	}
 
+	// Compute Shader
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "LocalCondCDF";
+		shaderInfo.fileName = "LocalCondCDF";
+		shaderInfo.bCreateCS = true;
+		localCondCDFShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "GlobalCondCDF";
+		shaderInfo.fileName = "GlobalCondCDF";
+		shaderInfo.bCreateCS = true;
+		globalCondCDFShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "BroadcastConCDF";
+		shaderInfo.fileName = "BroadcastConCDF";
+		shaderInfo.bCreateCS = true;
+		broadcastCondCDFShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "LocalEdgeCDF";
+		shaderInfo.fileName = "LocalEdgeCDF";
+		shaderInfo.bCreateCS = true;
+		localEdgeCDFShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "GlobalEdgeCDF";
+		shaderInfo.fileName = "GlobalEdgeCDF";
+		shaderInfo.bCreateCS = true;
+		globalEdgeCDFShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "CDFResult";
+		shaderInfo.fileName = "CDFResult";
+		shaderInfo.bCreateCS = true;
+		resultCDFShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+
+	// TODO
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "IntegrateCS";
+		shaderInfo.fileName = "IntegrateCS";
+		shaderInfo.bCreateCS = true;
+		IntegrateShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "TemporalAccumCS";
+		shaderInfo.fileName = "TemporalAccumCS";
+		shaderInfo.bCreateCS = true;
+		temporalAccumShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "VarianceCS";
+		shaderInfo.fileName = "VarianceCS";
+		shaderInfo.bCreateCS = true;
+		varianceShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+
+	{
+		ShaderInfo shaderInfo;
+		shaderInfo.shaderName = "SVGFSpatFilterCS";
+		shaderInfo.fileName = "SVGFSpatFilterCS";
+		shaderInfo.bCreateCS = true;
+		SVGFSpatFilterShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
+	}
+
 }
 
 void Render::CreateGlobalPSO()
@@ -495,6 +575,58 @@ void Render::CreateGlobalPSO()
 	}
 }
 
+void Render::CreateComputePSO()
+{
+	// environment-CDF
+	localCondCDFPSODescriptor.shader = localCondCDFShader.get();
+	localCondCDFPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(localCondCDFPSODescriptor);
+
+	globalCondCDFPSODescriptor.shader = globalCondCDFShader.get();
+	globalCondCDFPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(globalCondCDFPSODescriptor);
+
+	broadcastCondCDFPSODescriptor.shader = broadcastCondCDFShader.get();
+	broadcastCondCDFPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(broadcastCondCDFPSODescriptor);
+
+	localEdgeCDFPSODescriptor.shader = localEdgeCDFShader.get();
+	localEdgeCDFPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(localEdgeCDFPSODescriptor);
+
+	globalEdgeCDFPSODescriptor.shader = globalEdgeCDFShader.get();
+	globalEdgeCDFPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(globalEdgeCDFPSODescriptor);
+
+	resultCDFPSODescriptor.shader = resultCDFShader.get();
+	resultCDFPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(resultCDFPSODescriptor);
+
+	// integral
+	integratePSODescriptor.shader = IntegrateShader.get();
+	integratePSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(integratePSODescriptor);
+
+	// TAA
+	temporalAccumPSODescriptor.shader = temporalAccumShader.get();
+	temporalAccumPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(temporalAccumPSODescriptor);
+
+	// SVFG
+	variancePSODescriptor.shader = varianceShader.get();
+	variancePSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(variancePSODescriptor);
+
+	SVGFSpatFilterPSODescriptor.shader = SVGFSpatFilterShader.get();
+	SVGFSpatFilterPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePSOManager->TryCreatePSO(SVGFSpatFilterPSODescriptor);
+}
+
+void Render::CreateComputeShaderResource()
+{
+
+}
+
 void Render::Draw(const GameTimer& gt)
 {
 	d3d12RHI->ResetCommandAllocator();
@@ -507,6 +639,7 @@ void Render::Draw(const GameTimer& gt)
 		CreateIBLEnviromentMap();
  		CreateIBLIrradianceMap();
  		CreateIBLPrefilterEnvMap();
+		CreateEnviromentCDF();
 	}
 
 	GatherAllMeshBatchs();
@@ -777,6 +910,264 @@ void Render::CreateIBLPrefilterEnvMap()
 		// Change back to GENERIC_READ so we can read the texture in a shader.
 		d3d12RHI->TransitionResource(IBLPrefilterEnvMaps[mip]->GetRTCube()->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
+}
+
+void Render::CreateEnviromentCDF()
+{
+	// width and height for lat-long
+	auto desc = IBLEnvironmentMap->GetRTCube()->GetResource()->D3DResource->GetDesc();
+	UINT faceSize = (UINT)desc.Width;          // single face
+	UINT width = faceSize * 4;              // 4 ¡Á face
+	UINT height = faceSize * 2;              // 2 ¡Á face
+
+	// CDF output
+	// only for first frame, so create in this pass
+	{
+		TextureInfo textureInfo;
+		textureInfo.textureType = ETextureType::TEXTURE_2D;
+		textureInfo.dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		textureInfo.width = width;
+		textureInfo.height = height;
+		textureInfo.depth = 1;
+		textureInfo.arraySize = 1;
+		textureInfo.mipCount = 1;
+		textureInfo.format = DXGI_FORMAT_R32G32_FLOAT;
+		textureInfo.InitState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+
+		enviromentCDFTex0 = d3d12RHI->CreateTexture(textureInfo, TexCreate_SRV | TexCreate_UAV);
+	}
+	{
+		TextureInfo textureInfo;
+		textureInfo.textureType = ETextureType::TEXTURE_2D;
+		textureInfo.dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		textureInfo.width = width;
+		textureInfo.height = height;
+		textureInfo.depth = 1;
+		textureInfo.arraySize = 1;
+		textureInfo.mipCount = 1;
+		textureInfo.format = DXGI_FORMAT_R32G32_FLOAT;
+		textureInfo.InitState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+
+		enviromentCDFTex1 = d3d12RHI->CreateTexture(textureInfo, TexCreate_SRV | TexCreate_UAV);
+	}
+
+	UINT groupsPerRow = (UINT)ceilf(width / 64.0f);
+	UINT groupsPerColumn = (UINT)ceilf(height / 64.0f);
+
+	RWStructuredBufferRef localRowSumsBuf = d3d12RHI->CreateRWStructuredBuffer(sizeof(float), ((UINT)ceilf(width / 64.0f) * height));
+	RWStructuredBufferRef groupPrefixSumsBuf = d3d12RHI->CreateRWStructuredBuffer(sizeof(float), groupsPerRow * height);
+	RWStructuredBufferRef globalRowSumsBuf = d3d12RHI->CreateRWStructuredBuffer(sizeof(float), height);
+	RWStructuredBufferRef localColumnSumsBuf = d3d12RHI->CreateRWStructuredBuffer(sizeof(float), ((UINT)ceilf(height / 64.0f)));
+	RWStructuredBufferRef columnPrefixSumsBuf = d3d12RHI->CreateRWStructuredBuffer(sizeof(float), height);
+	RWStructuredBufferRef colGroupOffsetSumsBuf = d3d12RHI->CreateRWStructuredBuffer(sizeof(float), height/64.0f);
+
+	// CBV, count of blockSum
+	CB_EnvCDF cbData = {};
+	cbData.width = width;
+	cbData.height = height;
+	cbData.groupsPerRow = groupsPerRow;
+	cbData.groupsPerColumn = groupsPerColumn;
+
+	auto cbEnvCDF = d3d12RHI->CreateConstantBuffer(&cbData, sizeof(cbData));
+
+	// Local condCDF
+	{
+		// Set PSO
+		d3dCommandList->SetPipelineState(computePSOManager->GetPSO(localCondCDFPSODescriptor));
+		// Set RootSignature
+		auto shader = localCondCDFPSODescriptor.shader;
+		d3dCommandList->SetComputeRootSignature(shader->rootSignature.Get()); // should before binding
+
+		// CBV
+		shader->SetParameter("CB_EnvCDF", cbEnvCDF);
+
+		auto& textureMap = TextureRepository::Get().textureMap;
+		auto equirectangularSRV = textureMap[skyCubeTextureName]->GetD3DTexture()->GetSRV();
+		shader->SetParameter("EquirectangularMap", equirectangularSRV);
+
+		auto localRowSumsUAV = localRowSumsBuf->GetUAV();
+		shader->SetParameter("LocalRowSums", localRowSumsUAV);
+
+		auto environmentCDFUAV = enviromentCDFTex0->GetUAV();
+		shader->SetParameter("EnvironmentCDF_Out", environmentCDFUAV);
+
+		// Bind parameters
+		shader->BindParameters();
+
+		// Dispatch (16¡Á16 group)
+		UINT gx = (UINT)ceilf(width / 64.0f);
+		UINT gy = height;
+		d3dCommandList->Dispatch(gx, gy, 1);
+
+		d3d12RHI->TransitionResource(localRowSumsBuf->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		d3d12RHI->TransitionResource(enviromentCDFTex0->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		d3d12RHI->TransitionResource(enviromentCDFTex1->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		d3d12RHI->TransitionResource(globalRowSumsBuf->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	}
+
+	// Global condCDF
+	{
+		// Set PSO
+		d3dCommandList->SetPipelineState(computePSOManager->GetPSO(globalCondCDFPSODescriptor));
+		// Set RootSignature
+		auto shader = globalCondCDFPSODescriptor.shader;
+		d3dCommandList->SetComputeRootSignature(shader->rootSignature.Get()); // should before binding
+
+		// CBV
+		shader->SetParameter("CB_EnvCDF", cbEnvCDF);
+
+		auto localRowSumSRV = localRowSumsBuf->GetSRV();
+		shader->SetParameter("LocalRowSums", localRowSumSRV);
+
+		auto groupPrefixSumsUAV = groupPrefixSumsBuf->GetUAV();
+		shader->SetParameter("GroupPrefixSums", groupPrefixSumsUAV);
+
+		auto globalRowSumsUAV = globalRowSumsBuf->GetUAV();
+		shader->SetParameter("GlobalRowSums", globalRowSumsUAV);
+
+		// Bind parameters
+		shader->BindParameters();
+
+		// Dispatch
+		UINT gx = 1;
+		UINT gy = height;
+		d3dCommandList->Dispatch(gx, gy, 1);
+
+		d3d12RHI->TransitionResource(groupPrefixSumsBuf->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		d3d12RHI->TransitionResource(globalRowSumsBuf->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+
+	// BroadCast condCDF
+	{
+		// Set PSO
+		d3dCommandList->SetPipelineState(computePSOManager->GetPSO(broadcastCondCDFPSODescriptor));
+		// Set RootSignature
+		auto shader = broadcastCondCDFPSODescriptor.shader;
+		d3dCommandList->SetComputeRootSignature(shader->rootSignature.Get()); // should before binding
+
+		// CBV
+
+		shader->SetParameter("CB_EnvCDF", cbEnvCDF);
+
+		auto environmentCDFSRV = enviromentCDFTex0->GetSRV();
+		shader->SetParameter("EnvironmentCDF_In", environmentCDFSRV);
+
+		auto environmentCDFUAV = enviromentCDFTex1->GetUAV();
+		shader->SetParameter("EnvironmentCDF_Out", environmentCDFUAV);
+
+		auto groupPrefixSumsSRV = groupPrefixSumsBuf->GetSRV();
+		shader->SetParameter("GroupPrefixSums", groupPrefixSumsSRV);
+
+		auto globalRowSumsSRV = globalRowSumsBuf->GetSRV();
+		shader->SetParameter("GlobalRowSums", globalRowSumsSRV);
+
+		// Bind parameters
+		shader->BindParameters();
+
+		// Dispatch
+		UINT gx = (UINT)ceilf(width / 64.0f);
+		UINT gy = height;
+		d3dCommandList->Dispatch(gx, gy, 1);
+
+		d3d12RHI->TransitionResource(globalRowSumsBuf->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		d3d12RHI->TransitionResource(enviromentCDFTex1->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		d3d12RHI->TransitionResource(enviromentCDFTex0->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	}
+
+	// Local EdgeCDF
+	{
+		// Set PSO
+		d3dCommandList->SetPipelineState(computePSOManager->GetPSO(localEdgeCDFPSODescriptor));
+		// Set RootSignature
+		auto shader = localEdgeCDFPSODescriptor.shader;
+		d3dCommandList->SetComputeRootSignature(shader->rootSignature.Get()); // should before binding
+
+		// CBV
+		shader->SetParameter("CB_EnvCDF", cbEnvCDF);
+
+		auto globalRowSumsSRV = globalRowSumsBuf->GetSRV();
+		shader->SetParameter("GlobalRowSums", globalRowSumsSRV);
+
+		auto localColumnSumsUAV = localColumnSumsBuf->GetUAV();
+		shader->SetParameter("LocalColSums", localColumnSumsUAV);
+
+		auto columnPrefixSumsUAV = columnPrefixSumsBuf->GetUAV();
+		shader->SetParameter("ColumnPrefixSums", columnPrefixSumsUAV);
+
+		// Bind parameters
+		shader->BindParameters();
+
+		// Dispatch (numBlocks/256 ¡Á 1 group)
+
+		UINT gx = (UINT)ceilf(height / 64.0f);
+		UINT gy = 1;
+		d3dCommandList->Dispatch(gx, gy, 1);
+
+		d3d12RHI->TransitionResource(localColumnSumsBuf->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		d3d12RHI->TransitionResource(columnPrefixSumsBuf->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+
+	// Global EdgeCDF
+	{
+		// Set PSO
+		d3dCommandList->SetPipelineState(computePSOManager->GetPSO(globalEdgeCDFPSODescriptor));
+		// Set RootSignature
+		auto shader = globalEdgeCDFPSODescriptor.shader;
+		d3dCommandList->SetComputeRootSignature(shader->rootSignature.Get()); // should before binding
+
+		// CBV
+		shader->SetParameter("CB_EnvCDF", cbEnvCDF);
+
+		auto localColumnSumSRV = localColumnSumsBuf->GetSRV();
+		shader->SetParameter("LocalColSums", localColumnSumSRV);
+
+		auto colGroupOffsetSumsUAV = colGroupOffsetSumsBuf->GetUAV();
+		shader->SetParameter("GroupColOffset", colGroupOffsetSumsUAV);
+
+		// Bind parameters
+		shader->BindParameters();
+
+		// Dispatch
+		UINT gx = (UINT)ceilf(height / 64.0f / 64.0f);
+		UINT gy = 1;
+		d3dCommandList->Dispatch(gx, gy, 1);
+		d3d12RHI->TransitionResource(colGroupOffsetSumsBuf->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+
+	// CDF Result
+	{
+		// Set PSO
+		d3dCommandList->SetPipelineState(computePSOManager->GetPSO(resultCDFPSODescriptor));
+		// Set RootSignature
+		auto shader = resultCDFPSODescriptor.shader;
+		d3dCommandList->SetComputeRootSignature(shader->rootSignature.Get()); // should before binding
+
+		// CBV
+		shader->SetParameter("CB_EnvCDF", cbEnvCDF);
+
+		auto environmentCDFSRV = enviromentCDFTex1->GetSRV();
+		shader->SetParameter("EnvironmentCDF_In", environmentCDFSRV);
+
+		auto environmentCDFUAV = enviromentCDFTex0->GetUAV();
+		shader->SetParameter("EnvironmentCDF_Out", environmentCDFUAV);
+
+		auto columnPrefixSumsSRV = columnPrefixSumsBuf->GetSRV();
+		shader->SetParameter("ColumnPrefixSums", columnPrefixSumsSRV);
+
+		auto colGroupPrefixSumsSRV = colGroupOffsetSumsBuf->GetSRV();
+		shader->SetParameter("GroupColOffset", colGroupPrefixSumsSRV);
+
+		// Bind parameters
+		shader->BindParameters();
+
+		// Dispatch
+		UINT gx = width;
+		UINT gy = (UINT)ceilf(height / 64.0f);
+		d3dCommandList->Dispatch(gx, gy, 1);
+	}
+
+	// UAV ¡ú SRV for runtime sampling
+	d3d12RHI->TransitionResource(enviromentCDFTex0->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
 }
 
 void Render::GatherAllMeshBatchs()

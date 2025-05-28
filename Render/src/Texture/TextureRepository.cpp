@@ -22,7 +22,11 @@ void TextureRepository::Load()
 	// LUT
 	textureMap.emplace("IBL_BRDF_LUT", std::make_shared<Texture2D>("IBL_BRDF_LUT", false, TextureDir + L"IBL_BRDF_LUT.png"));
 	// HDR
-	textureMap.emplace("bloem_hill", std::make_shared<Texture2D>("bloem_hill", false, TextureDir + L"bloem_hill_01_2k.hdr"));
+	//textureMap.emplace("bloem_hill", std::make_shared<Texture2D>("bloem_hill", false, TextureDir + L"bloem_hill_01_2k.hdr"));
+	textureMap.emplace("poolbeg_2k", std::make_shared<Texture2D>("poolbeg_2k", false, TextureDir + L"poolbeg_2k.hdr"));
+
+	// Blue Noise
+	textureMap.emplace("SRBN_RG", std::make_shared<Texture2D>("SRBN_RG", false, TextureDir + L"stbn_RG.dds"));
 }
 
 void TextureRepository::Unload()

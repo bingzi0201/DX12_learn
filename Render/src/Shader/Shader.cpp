@@ -176,7 +176,7 @@ void Shader::GetShaderParameters(ComPtr<ID3DBlob> passBlob, EShaderType shaderTy
 		}
 		else if (resourceType == D3D_SHADER_INPUT_TYPE::D3D_SIT_SAMPLER)
 		{
-			assert(shaderType == EShaderType::PIXEL_SHADER);
+			assert(shaderType == EShaderType::PIXEL_SHADER || shaderType == EShaderType::COMPUTE_SHADER);
 
 			ShaderSamplerParameter param;
 			param.name = shaderVarName;

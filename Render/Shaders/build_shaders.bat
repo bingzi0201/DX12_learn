@@ -15,6 +15,44 @@ echo ================================================
 echo Building shaders to "%OUTDIR%"
 echo ================================================
 
+:: === EnviromentCDF Passes ===
+echo [EnviromentCDF - LocalCondCDFCS] CS...
+"%FXC%" /T cs_5_0 /E CS        "%SHADER_DIR%LocalCondCDF.hlsl" /Fo "%OUTDIR%\LocalCondCDFCS.cso"
+if errorlevel 1 goto :error
+
+echo [EnviromentCDF - GlobalCondCDFCS] CS...
+"%FXC%" /T cs_5_0 /E CS        "%SHADER_DIR%GlobalCondCDF.hlsl" /Fo "%OUTDIR%\GlobalCondCDFCS.cso"
+if errorlevel 1 goto :error
+
+echo [EnviromentCDF - BroadcastConCDF] CS...
+"%FXC%" /T cs_5_0 /E CS        "%SHADER_DIR%BroadcastConCDF.hlsl" /Fo "%OUTDIR%\BroadcastConCDFCS.cso"
+if errorlevel 1 goto :error
+
+echo [EnviromentCDF - LocalEdgeCDFCS] CS...
+"%FXC%" /T cs_5_0 /E CS        "%SHADER_DIR%LocalEdgeCDF.hlsl" /Fo "%OUTDIR%\LocalEdgeCDFCS.cso"
+if errorlevel 1 goto :error
+
+echo [EnviromentCDF - GlobalEdgeCDFCS] CS...
+"%FXC%" /T cs_5_0 /E CS        "%SHADER_DIR%GlobalEdgeCDF.hlsl" /Fo "%OUTDIR%\GlobalEdgeCDFCS.cso"
+if errorlevel 1 goto :error
+
+:: === ∆‰”‡ Compute Shader ===
+echo [IntegrateCS] CS...
+"%FXC%" /T cs_5_0 /E CS               "%SHADER_DIR%IntegrateCS.hlsl"     /Fo "%OUTDIR%\IntegrateCS.cso"
+if errorlevel 1 goto :error
+
+echo [VarianceCS] CS...
+"%FXC%" /T cs_5_0 /E CS               "%SHADER_DIR%VarianceCS.hlsl"      /Fo "%OUTDIR%\VarianceCS.cso"
+if errorlevel 1 goto :error
+
+echo [TemporalAccumCS] CS...
+"%FXC%" /T cs_5_0 /E CS               "%SHADER_DIR%TemporalAccumCS.hlsl" /Fo "%OUTDIR%\TemporalAccumCS.cso"
+if errorlevel 1 goto :error
+
+echo [SVGFSpatFilterCS] CS...
+"%FXC%" /T cs_5_0 /E CS               "%SHADER_DIR%SVGFSpatFilterCS.hlsl" /Fo "%OUTDIR%\SVGFSpatFilterCS.cso"
+if errorlevel 1 goto :error
+
 rem -------------------------------
 rem IBLEnvironment.hlsl
 rem -------------------------------
