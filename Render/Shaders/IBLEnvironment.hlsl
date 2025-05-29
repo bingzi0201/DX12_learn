@@ -31,17 +31,17 @@ VertexOut VS(VertexIn vin)
 float2 SampleSphericalMap(float3 v)
 {
     // (1/2PI, 1/PI)
-    const float2 InvAtan = float2(0.1591, 0.3183);
+    const float2 invAtan = float2(0.1591, 0.3183);
     
-    float2 UV = float2(atan2(v.z, v.x), asin(v.y));
-    UV *= InvAtan; // normalize
-    UV += 0.5;
-    return UV;
+    float2 uv = float2(atan2(v.z, v.x), asin(v.y));
+    uv *= invAtan; // normalize
+    uv += 0.5;
+    return uv;
 }
 
 float4 PS(VertexOut pin) : SV_TARGET
 {
-    float2 UV = SampleSphericalMap(normalize(pin.PosL));
-    float3 Color = EquirectangularMap.SampleLevel(gsamLinearClamp, UV, 0).rgb;
-    return float4(Color, 1.0f);
+    float2 uv = SampleSphericalMap(normalize(pin.PosL));
+    float3 color = EquirectangularMap.SampleLevel(gsamLinearClamp, uv, 0).rgb;
+    return float4(color, 1.0f);
 }

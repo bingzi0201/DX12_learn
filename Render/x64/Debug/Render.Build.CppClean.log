@@ -71,6 +71,11 @@ g:\render0314\trunk\render\x64\debug\poly2tri.dll
 g:\render0314\trunk\render\x64\debug\minizip.dll
 g:\render0314\trunk\render\x64\debug\zlibd1.dll
 g:\render0314\trunk\render\x64\debug\pugixml.dll
+g:\render0314\trunk\render\x64\debug\assimp-vc142-mt.pdb
+g:\render0314\trunk\render\x64\debug\draco.pdb
+g:\render0314\trunk\render\x64\debug\minizip.pdb
+g:\render0314\trunk\render\x64\debug\pugixml.pdb
+g:\render0314\trunk\render\x64\debug\zlib.pdb
 g:\render0314\trunk\render\x64\debug\render.tlog\cl.command.1.tlog
 g:\render0314\trunk\render\x64\debug\render.tlog\cl.read.1.tlog
 g:\render0314\trunk\render\x64\debug\render.tlog\cl.write.1.tlog
