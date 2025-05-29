@@ -435,13 +435,6 @@ void Render::CreateGlobalShaders()
 	}
 
 	// TODO
-	{
-		ShaderInfo shaderInfo;
-		shaderInfo.shaderName = "IntegrateCS";
-		shaderInfo.fileName = "IntegrateCS";
-		shaderInfo.bCreateCS = true;
-		IntegrateShader = std::make_unique<Shader>(shaderInfo, d3d12RHI);
-	}
 
 	{
 		ShaderInfo shaderInfo;
@@ -601,11 +594,6 @@ void Render::CreateComputePSO()
 	resultCDFPSODescriptor.shader = resultCDFShader.get();
 	resultCDFPSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	computePSOManager->TryCreatePSO(resultCDFPSODescriptor);
-
-	// integral
-	integratePSODescriptor.shader = IntegrateShader.get();
-	integratePSODescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-	computePSOManager->TryCreatePSO(integratePSODescriptor);
 
 	// TAA
 	temporalAccumPSODescriptor.shader = temporalAccumShader.get();
@@ -914,11 +902,11 @@ void Render::CreateIBLPrefilterEnvMap()
 
 void Render::CreateEnviromentCDF()
 {
-	// width and height for lat-long
-	auto desc = IBLEnvironmentMap->GetRTCube()->GetResource()->D3DResource->GetDesc();
-	UINT faceSize = (UINT)desc.Width;          // single face
-	UINT width = faceSize * 4;              // 4 ¡Á face
-	UINT height = faceSize * 2;              // 2 ¡Á face
+	auto& textureMap = TextureRepository::Get().textureMap;
+	auto equirectangularSRV = textureMap[skyCubeTextureName]->GetD3DTexture()->GetSRV();
+	auto eqTexDesc = textureMap[skyCubeTextureName]->GetD3DTexture()->GetResource()->D3DResource->GetDesc();
+	UINT height = eqTexDesc.Height;
+	UINT width = eqTexDesc.Width;
 
 	// CDF output
 	// only for first frame, so create in this pass
@@ -981,8 +969,6 @@ void Render::CreateEnviromentCDF()
 		// CBV
 		shader->SetParameter("CB_EnvCDF", cbEnvCDF);
 
-		auto& textureMap = TextureRepository::Get().textureMap;
-		auto equirectangularSRV = textureMap[skyCubeTextureName]->GetD3DTexture()->GetSRV();
 		shader->SetParameter("EquirectangularMap", equirectangularSRV);
 
 		auto localRowSumsUAV = localRowSumsBuf->GetUAV();
@@ -1168,6 +1154,11 @@ void Render::CreateEnviromentCDF()
 
 	// UAV ¡ú SRV for runtime sampling
 	d3d12RHI->TransitionResource(enviromentCDFTex0->GetResource(), D3D12_RESOURCE_STATE_GENERIC_READ);
+}
+
+void Render::IntegratePass()
+{
+
 }
 
 void Render::GatherAllMeshBatchs()

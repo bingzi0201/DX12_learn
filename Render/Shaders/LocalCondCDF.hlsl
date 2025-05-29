@@ -1,12 +1,4 @@
-#include "Utils.hlsl"
-
-cbuffer CB_EnvCDF
-{
-    uint width;
-    uint height;
-    uint groupsPerRow;
-    uint groupsPerColumn;
-};
+#include "Common.hlsl"
 
 Texture2D EquirectangularMap;
 RWTexture2D<float2> EnvironmentCDF_Out;
@@ -57,6 +49,6 @@ void CS(int3 tid : SV_GroupThreadID, int3 did : SV_DispatchThreadID)
     
     if (active && tid.x < 256)
     {
-        EnvironmentCDF_Out[did.xy] = float2(Prefix[tid.x], lumi);
+        EnvironmentCDF_Out[did.xy] = float2(Prefix[tid.x], 0.0f);
     }
 }

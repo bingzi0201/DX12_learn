@@ -563,7 +563,7 @@
     <None Include="Shaders\IBLPrefilterEnv.hlsl" />
     <None Include="Shaders\BasePassSky.hlsl" />
     <None Include="Shaders\IBLIrradiance.hlsl" />
-    <None Include="Shaders\IntegrateCS.hlsl" />
+    <None Include="Shaders\Integrate.hlsl" />
     <None Include="Shaders\TemporalAccumCS.hlsl" />
     <None Include="Shaders\VarianceCS.hlsl" />
     <None Include="Shaders\SVGFSpatFilterCS.hlsl" />

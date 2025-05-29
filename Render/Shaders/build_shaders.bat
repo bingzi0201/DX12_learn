@@ -36,11 +36,6 @@ echo [EnviromentCDF - GlobalEdgeCDFCS] CS...
 "%FXC%" /T cs_5_0 /E CS        "%SHADER_DIR%GlobalEdgeCDF.hlsl" /Fo "%OUTDIR%\GlobalEdgeCDFCS.cso"
 if errorlevel 1 goto :error
 
-:: === ∆‰”‡ Compute Shader ===
-echo [IntegrateCS] CS...
-"%FXC%" /T cs_5_0 /E CS               "%SHADER_DIR%IntegrateCS.hlsl"     /Fo "%OUTDIR%\IntegrateCS.cso"
-if errorlevel 1 goto :error
-
 echo [VarianceCS] CS...
 "%FXC%" /T cs_5_0 /E CS               "%SHADER_DIR%VarianceCS.hlsl"      /Fo "%OUTDIR%\VarianceCS.cso"
 if errorlevel 1 goto :error
@@ -85,6 +80,7 @@ if errorlevel 1 goto :error
 echo [IBLPrefilterEnv] PS...
 "%FXC%" /T ps_5_0 /E PS   "%SHADER_DIR%IBLPrefilterEnv.hlsl" /Fo "%OUTDIR%\IBLPrefilterEnvPS.cso"
 if errorlevel 1 goto :error
+
 
 rem -------------------------------
 rem BasePassSky.hlsl
@@ -134,11 +130,11 @@ rem -------------------------------
 rem PostProcess.hlsl
 rem -------------------------------
 echo [PostProcess] VS...
-"%FXC%" /T vs_5_0 /E VS   "%SHADER_DIR%PostProcess.hlsl" /Fo "%OUTDIR%\PostProcess.cso"
+"%FXC%" /T vs_5_0 /E VS   "%SHADER_DIR%PostProcess.hlsl" /Fo "%OUTDIR%\PostProcessVS.cso"
 if errorlevel 1 goto :error
 
 echo [PostProcess] PS...
-"%FXC%" /T ps_5_0 /E PS   "%SHADER_DIR%PostProcess.hlsl" /Fo "%OUTDIR%\PostProcess.cso"
+"%FXC%" /T ps_5_0 /E PS   "%SHADER_DIR%PostProcess.hlsl" /Fo "%OUTDIR%\PostProcessPS.cso"
 if errorlevel 1 goto :error
 
 echo.

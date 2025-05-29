@@ -47,4 +47,12 @@ cbuffer cbMaterialData
     MaterialData gMaterial;
 };
 
+cbuffer CB_EnvCDF
+{
+    uint width;
+    uint height;
+    uint groupsPerRow;
+    uint groupsPerColumn;
+};
+
 #endif //__SHADER_COMMON__

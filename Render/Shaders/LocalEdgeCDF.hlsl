@@ -1,12 +1,4 @@
-#include "Utils.hlsl"
-
-cbuffer CB_EnvCDF
-{
-    uint width;
-    uint height;
-    uint groupsPerRow;
-    uint groupsPerColumn;
-};
+#include "Common.hlsl"
 
 StructuredBuffer<float> GlobalRowSums;
 RWStructuredBuffer<float> LocalColSums;
