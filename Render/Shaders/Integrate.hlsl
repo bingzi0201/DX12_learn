@@ -29,32 +29,16 @@ float2 BlueNoise(uint2 pix)
     return BlueNoiseTex.Load(int3(coord, 0)).rg;
 }
 
-/*float SolidAngle(int x, int y)
-{
-    float invN = 1.0 / pixelCount;
-    float u0 = (x) * 2 * invN - 1;
-    float v0 = (y) * 2 * invN - 1;
-    float u1 = ((x + 1)) * 2 * invN - 1;
-    float v1 = ((y + 1)) * 2 * invN - 1;
-
-    float f00 = atan2(u0 * v0, sqrt(u0 * u0 + v0 * v0 + 1));
-    float f01 = atan2(u0 * v1, sqrt(u0 * u0 + v1 * v1 + 1));
-    float f10 = atan2(u1 * v0, sqrt(u1 * u1 + v0 * v0 + 1));
-    float f11 = atan2(u1 * v1, sqrt(u1 * u1 + v1 * v1 + 1));
-    return f11 - f10 - f01 + f00; // ΔΩ
-}*/
-
 float SolidAngle(int x, int y)
 {
-    float invN = 1.0f / pixelCount;
-    float u = (x + 0.5f) * 2.0f * invN - 1.0f;
-    float v = (y + 0.5f) * 2.0f * invN - 1.0f;
+    float inverseHeight = 1 / height;
+    float inverseWidth = 1 / width;
     
-    float boundary = max(abs(u), abs(v)); // [0,1]
-    float correction = 1.0f + 0.1f * boundary * boundary;
-    
-    float distortion = 1.0f + u * u + v * v;
-    return 4.0f * invN * invN / (distortion * sqrt(distortion)) * correction;
+    float dTheta = PI * inverseHeight;
+    float dPhi = 2 * PI * inverseWidth;
+    float theta0 = PI * y * inverseHeight;
+    float theta1 = PI * (y + 1.0) * inverseHeight;
+    return dPhi * (cos(theta0) - cos(theta1));
 }
 
 void SampleEnvCDF(float2 xi, out uint face,
