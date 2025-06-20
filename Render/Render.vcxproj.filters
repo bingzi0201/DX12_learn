@@ -201,6 +201,9 @@
     <ClCompile Include="src\Actor\HDRSkyActor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\DXR\RaytracingAccelerationStructure.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\icon.ico">
@@ -538,6 +541,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Actor\HDRSkyActor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DXR\RaytracingAccelerationStructure.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

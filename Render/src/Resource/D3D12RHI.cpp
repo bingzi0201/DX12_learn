@@ -17,6 +17,19 @@ D3D12RHI::~D3D12RHI()
 	Destroy();
 }
 
+bool D3D12RHI::CheckRaytracingSupport()
+{
+	// Check if the device supports raytracing
+	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5;
+	HRESULT hr = device->GetD3DDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
+	if (FAILED(hr))
+	{
+		return false;
+	}
+
+	return options5.RaytracingTier != D3D12_RAYTRACING_TIER_NOT_SUPPORTED;
+}
+
 void D3D12RHI::Initialize(HWND WindowHandle, int WindowWidth, int WindowHeight)
 {
 	// D3D12 debug

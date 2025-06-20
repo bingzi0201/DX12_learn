@@ -4,7 +4,7 @@
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
-BuddyAllocator::BuddyAllocator(ID3D12Device* device, const AllocatorInitData& initData) : 
+BuddyAllocator::BuddyAllocator(ID3D12Device5* device, const AllocatorInitData& initData) : 
 	d3dDevice(device), initData(initData)
 {
 	Initialize();
@@ -271,7 +271,7 @@ void BuddyAllocator::DeallocateBlock(uint32_t offset, uint32_t order)
 	}
 }
 
-MultiBuddyAllocator::MultiBuddyAllocator(ID3D12Device* inDevice, const BuddyAllocator::AllocatorInitData& inInitData)
+MultiBuddyAllocator::MultiBuddyAllocator(ID3D12Device5* inDevice, const BuddyAllocator::AllocatorInitData& inInitData)
 	:d3dDevice(inDevice), initData(inInitData)
 {
 
@@ -310,7 +310,7 @@ void MultiBuddyAllocator::CleanUpAllocations()
 	}
 }
 
-UploadBufferAllocator::UploadBufferAllocator(ID3D12Device* InDevice)
+UploadBufferAllocator::UploadBufferAllocator(ID3D12Device5* InDevice)
 {
 	BuddyAllocator::AllocatorInitData initData;
 	initData.allocationStrategy = BuddyAllocator::EAllocationStrategy::ManualSubAllocation;
@@ -336,7 +336,7 @@ void UploadBufferAllocator::CleanUpAllocations()
 
 
 
-DefaultBufferAllocator::DefaultBufferAllocator(ID3D12Device* InDevice)
+DefaultBufferAllocator::DefaultBufferAllocator(ID3D12Device5* InDevice)
 {
 	{
 		BuddyAllocator::AllocatorInitData initData;
@@ -378,7 +378,7 @@ void DefaultBufferAllocator::CleanUpAllocations()
 
 
 
-TextureResourceAllocator::TextureResourceAllocator(ID3D12Device* inDevice)
+TextureResourceAllocator::TextureResourceAllocator(ID3D12Device5* inDevice)
 {
 	BuddyAllocator::AllocatorInitData initData;
 	initData.allocationStrategy = BuddyAllocator::EAllocationStrategy::PlacedResource;
@@ -412,4 +412,120 @@ void TextureResourceAllocator::AllocTextureResource(const D3D12_RESOURCE_STATES&
 void TextureResourceAllocator::CleanUpAllocations()
 {
 	allocator->CleanUpAllocations();
+}
+
+DXRResourceAllocator::DXRResourceAllocator(ID3D12Device5* inDevice)
+    : d3dDevice(inDevice)
+{
+    BuddyAllocator::AllocatorInitData initData;
+    initData.allocationStrategy = BuddyAllocator::EAllocationStrategy::PlacedResource;
+    initData.heapType = D3D12_HEAP_TYPE_DEFAULT;
+    // DXR Acceleration Structures are buffers, so this heap flag is appropriate.
+    initData.heapFlags = D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
+    initData.resourceFlags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+    allocator = std::make_unique<MultiBuddyAllocator>(inDevice, initData);
+}
+
+void DXRResourceAllocator::AllocAccelerationStructureResource(
+    UINT64 sizeInBytes,
+    const std::wstring& resourceName,
+    ResourceLocation& resourceLocation)
+{
+    // DXR AS require their GPU Virtual Address to be 256-byte aligned.
+    // The sizeInBytes parameter is also expected to be 256-byte aligned by the caller.
+    // The alignment passed to AllocResource ensures the offset within the heap is 256-byte aligned.
+    allocator->AllocResource(
+        (uint32_t)sizeInBytes,
+        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT, // 256 bytes
+        resourceLocation
+    );
+
+    // Create the Placed Resource for the Acceleration Structure
+    D3D12_RESOURCE_DESC resourceDesc = {};
+    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    resourceDesc.Alignment = 0; // For PlacedResource, alignment is determined by heap offset
+    resourceDesc.Width = sizeInBytes;
+    resourceDesc.Height = 1;
+    resourceDesc.DepthOrArraySize = 1;
+    resourceDesc.MipLevels = 1;
+    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+    resourceDesc.SampleDesc.Count = 1;
+    resourceDesc.SampleDesc.Quality = 0;
+    resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS; // AS requires UAV access
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> placedD3DResource;
+    ID3D12Heap* backingHeap = resourceLocation.buddyAllocator->GetBackingHeap(); // Assumes this getter exists
+    uint64_t heapOffset = resourceLocation.offsetFromBaseOfHeap;
+
+    HRESULT hr = d3dDevice->CreatePlacedResource(
+        backingHeap,
+        heapOffset,
+        &resourceDesc,
+        D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE, // Initial state for AS
+        nullptr, // No optimized clear value for buffers
+        IID_PPV_ARGS(&placedD3DResource)
+    );
+
+    Resource* newUnderlyingResource = new Resource(placedD3DResource);
+    resourceLocation.underlyingResource = newUnderlyingResource;
+    resourceLocation.blockData.placedResource = newUnderlyingResource; // Ensure ownership is clear
+}
+
+void DXRResourceAllocator::AllocScratchResource(
+    UINT64 sizeInBytes,
+    const std::wstring& resourceName,
+    ResourceLocation& resourceLocation)
+{
+    // Scratch buffers also require UAV access and are typically placed in default heaps.
+    // 256-byte alignment for their GPUVA is good practice and often required implicitly by drivers.
+    allocator->AllocResource(
+        (uint32_t)sizeInBytes,
+        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT, // Using 256 for consistency, or D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT
+        resourceLocation
+    );
+
+    D3D12_RESOURCE_DESC resourceDesc = {};
+    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    resourceDesc.Alignment = 0;
+    resourceDesc.Width = sizeInBytes;
+    resourceDesc.Height = 1;
+    resourceDesc.DepthOrArraySize = 1;
+    resourceDesc.MipLevels = 1;
+    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+    resourceDesc.SampleDesc.Count = 1;
+    resourceDesc.SampleDesc.Quality = 0;
+    resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS; // Scratch buffers are UAVs
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> placedD3DResource;
+    ID3D12Heap* backingHeap = resourceLocation.buddyAllocator->GetBackingHeap();
+    uint64_t heapOffset = resourceLocation.offsetFromBaseOfHeap;
+
+    HRESULT hr = d3dDevice->CreatePlacedResource(
+        backingHeap,
+        heapOffset,
+        &resourceDesc,
+        D3D12_RESOURCE_STATE_UNORDERED_ACCESS, // Initial state for scratch buffers
+        nullptr,
+        IID_PPV_ARGS(&placedD3DResource)
+    );
+
+    if (!resourceName.empty())
+    {
+        placedD3DResource->SetName(resourceName.c_str());
+    }
+
+    Resource* newUnderlyingResource = new Resource(placedD3DResource);
+    resourceLocation.underlyingResource = newUnderlyingResource;
+    resourceLocation.blockData.placedResource = newUnderlyingResource;
+}
+
+void DXRResourceAllocator::CleanUpAllocations()
+{
+    if (allocator)
+    {
+        allocator->CleanUpAllocations();
+    }
 }

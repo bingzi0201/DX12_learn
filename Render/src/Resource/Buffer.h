@@ -70,6 +70,25 @@ private:
 typedef std::shared_ptr<RWStructuredBuffer> RWStructuredBufferRef;
 
 
+class AccelerationStructureBuffer : public Buffer
+{
+public:
+    ShaderResourceView* GetSRV()
+    {
+        return srv.get();
+    }
+
+    void SetSRV(std::unique_ptr<ShaderResourceView>& srv)
+    {
+        srv = std::move(srv);
+    }
+
+private:
+	std::unique_ptr<ShaderResourceView> srv = nullptr;
+};
+typedef std::shared_ptr<AccelerationStructureBuffer> ASBufferRef;
+
+
 class VertexBuffer : public Buffer
 {
 };

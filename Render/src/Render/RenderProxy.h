@@ -51,6 +51,7 @@ struct MeshProxy
 	VertexBufferRef vertexBufferRef;
 	IndexBufferRef indexBufferRef;
 
+	ASBufferRef blasBufferRef;
 
 	// Data about the buffers.
 	UINT vertexByteStride = 0;
@@ -62,6 +63,7 @@ struct MeshProxy
 	// Use this container to define the Submesh geometries so we can draw
 	// the Submeshes individually.
 	std::unordered_map<std::string, SubmeshProxy> subMeshs;
+
 };
 
 struct LightShaderParameters

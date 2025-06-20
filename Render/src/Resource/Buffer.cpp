@@ -166,4 +166,59 @@ void D3D12RHI::CreateAndInitDefaultBuffer(const void* contents, uint32_t size, u
 	CopyBufferRegion(defaultBuffer, resourceLocation.offsetFromBaseOfResource, uploadBuffer, uploadResourceLocation.offsetFromBaseOfResource, size);
 }
 
+ASBufferRef D3D12RHI::CreateTopLevelAccelerationStructure(
+    UINT64 tlasSizeInBytes,
+    const std::wstring& tlasName)
+{
+    if (tlasSizeInBytes == 0)
+    {
+        // Log error: TLAS size cannot be zero.
+        return nullptr;
+    }
 
+	auto dxrResourceAllocator = GetDevice()->GetDXRResourceAllocator();
+
+    // Ensure DXRResourceAllocator is initialized
+    if (!dxrResourceAllocator)
+    {
+
+        if (!dxrResourceAllocator) return nullptr; // Double check after potential lazy init
+    }
+
+    ResourceLocation resourceLocation; // This will be filled by the allocator
+    dxrResourceAllocator->AllocAccelerationStructureResource(tlasSizeInBytes, tlasName, resourceLocation);
+
+    // 2. Create the AccelerationStructureBuffer wrapper
+    std::unique_ptr<Resource> tlasUnderlyingResource(resourceLocation.underlyingResource);
+    // Null out the raw pointer in resourceLocation to signify transfer of ownership,
+    // if ResourceLocation isn't designed to manage its lifetime past this point.
+    resourceLocation.underlyingResource = nullptr;
+    if (resourceLocation.blockData.placedResource == tlasUnderlyingResource.get()) {
+        resourceLocation.blockData.placedResource = nullptr;
+    }
+
+    ASBufferRef asBufferRef = std::make_shared<AccelerationStructureBuffer>(
+        GetDevice(), // Pass your Device wrapper
+        std::move(tlasUnderlyingResource),
+        tlasName
+    );
+
+    ID3D12Resource* tlasD3DResource = asBufferRef->GetResource()->D3DResource.Get(); // Get the underlying ID3D12Resource
+    if (!tlasD3DResource) {
+        // Log error
+        return nullptr;
+    }
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // Not used for raw/structured buffers or AS
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.RaytracingAccelerationStructure.Location = tlasD3DResource->GetGPUVirtualAddress();
+    // Note: For PlacedResource, GetGPUVirtualAddress() on the ID3D12Resource itself
+    // already gives the correct address (Heap Base + Offset). No need to add resourceLocation.offsetFromBaseOfHeap here.
+
+	auto srv = std::make_unique<ShaderResourceView>(GetDevice(), srvDesc, nullptr); // Pass nullptr for resource if SRV is for AS location
+
+	asBufferRef->SetSRV(srv);
+    return asBufferRef;
+}

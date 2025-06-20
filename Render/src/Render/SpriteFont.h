@@ -19,7 +19,7 @@
 class SpriteFont
 {
 public:
-	SpriteFont(ID3D12Device* device, _In_z_ wchar_t const* fileName);
+	SpriteFont(ID3D12Device5* device, _In_z_ wchar_t const* fileName);
 
 	// Describes a single character glyph.
 	struct Glyph

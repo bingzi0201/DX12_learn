@@ -15,7 +15,7 @@
 
 static const char spriteFontMagic[] = "DXTKfont";
 
-SpriteFont::SpriteFont(ID3D12Device* device, _In_z_ wchar_t const* fileName)
+SpriteFont::SpriteFont(ID3D12Device5* device, _In_z_ wchar_t const* fileName)
 {
 	TBinaryReader reader(fileName);
 

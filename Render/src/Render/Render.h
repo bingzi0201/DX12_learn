@@ -130,8 +130,8 @@ private:
 
 	World* world;
 
-	ID3D12Device* d3dDevice;
-	ID3D12GraphicsCommandList* d3dCommandList;
+	ID3D12Device5* d3dDevice;
+	ID3D12GraphicsCommandList4* d3dCommandList;
 
 	std::unique_ptr<ShaderResourceView> texture2DNullDescriptor = nullptr;
 	std::unique_ptr<ShaderResourceView> texture3DNullDescriptor = nullptr;

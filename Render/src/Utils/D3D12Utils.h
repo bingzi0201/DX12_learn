@@ -65,3 +65,13 @@ inline UIntPoint GetTextureSize(ID3D12Resource* texture)
 	const auto desc = texture->GetDesc();
 	return UIntPoint(static_cast<uint32_t>(desc.Width), static_cast<uint32_t>(desc.Height));
 }
+
+inline void ThrowIfFalse(bool value)
+{
+    ThrowIfFailed(value ? S_OK : E_FAIL);
+}
+
+inline void ThrowIfFalse(bool value, const wchar_t* msg)
+{
+    ThrowIfFailed(value ? S_OK : E_FAIL, msg);
+}

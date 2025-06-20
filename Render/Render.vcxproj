@@ -221,6 +221,7 @@
     <ClCompile Include="src\Component\MeshComponent.cpp" />
     <ClCompile Include="src\DXMath\DXMath.cpp" />
     <ClCompile Include="src\DXMath\MathHelper.cpp" />
+    <ClCompile Include="src\DXR\RaytracingAccelerationStructure.cpp" />
     <ClCompile Include="src\Engine\Engine.cpp" />
     <ClCompile Include="src\Engine\GameTimer.cpp" />
     <ClCompile Include="src\File\BinaryReader.cpp" />
@@ -298,6 +299,7 @@
     <ClInclude Include="src\Actor\标头.h" />
     <ClInclude Include="src\Common\DXHelper.h" />
     <ClInclude Include="src\Component\MeshComponent.h" />
+    <ClInclude Include="src\DXR\RaytracingAccelerationStructure.h" />
     <ClInclude Include="src\Engine\Engine.h" />
     <ClInclude Include="src\Engine\GameTimer.h" />
     <ClInclude Include="src\File\BinaryReader.h" />

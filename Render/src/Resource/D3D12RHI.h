@@ -27,6 +27,8 @@ public:
 	IDXGIFactory4* GetDxgiFactory();
 
 public:
+	//---------------------------RHI Device-----------------------------------
+	bool CheckRaytracingSupport();
 	//---------------------------RHI CommandList-----------------------------
 	void FlushCommandQueue();
 	void ExecuteCommandLists();
@@ -46,6 +48,7 @@ public:
 	VertexBufferRef CreateVertexBuffer(const void* contents, uint32_t size);
 	IndexBufferRef CreateIndexBuffer(const void* contents, uint32_t size);
 	ReadBackBufferRef CreateReadBackBuffer(uint32_t size);
+	ASBufferRef CreateTopLevelAccelerationStructure(UINT64 tlasSizeInBytes,const std::wstring& tlasName = L"TLAS");
 	void SetVertexBuffer(const VertexBufferRef& vertexBuffer, UINT offset, UINT stride, UINT size);
 	void SetIndexBuffer(const IndexBufferRef& indexBuffer, UINT offset, DXGI_FORMAT format, UINT size);
 

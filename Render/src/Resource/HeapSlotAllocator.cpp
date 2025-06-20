@@ -2,7 +2,7 @@
 #include <assert.h>
 
 
-HeapSlotAllocator::HeapSlotAllocator(ID3D12Device* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptorsPerHeap)
+HeapSlotAllocator::HeapSlotAllocator(ID3D12Device5* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptorsPerHeap)
 	:d3dDevice(inDevice),
 	heapDesc(CreateHeapDesc(type, numDescriptorsPerHeap)),
 	descriptorSize(d3dDevice->GetDescriptorHandleIncrementSize(heapDesc.Type))

@@ -32,7 +32,7 @@ private:
 	};
 
 public:
-	HeapSlotAllocator(ID3D12Device* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptorsPerHeap);
+	HeapSlotAllocator(ID3D12Device5* inDevice, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptorsPerHeap);
 	~HeapSlotAllocator();
 
 	HeapSlot AllocateHeapSlot();
@@ -43,7 +43,7 @@ private:
 	void AllocateHeap();
 
 private:
-	ID3D12Device* d3dDevice;
+	ID3D12Device5* d3dDevice;
 	const D3D12_DESCRIPTOR_HEAP_DESC heapDesc;
 	const uint32_t descriptorSize;
 	std::vector<HeapEntry> heapMap;

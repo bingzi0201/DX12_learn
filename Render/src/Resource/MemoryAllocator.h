@@ -27,7 +27,7 @@ public:
 	};
 
 public:
-	BuddyAllocator(ID3D12Device* device, const AllocatorInitData& initData);
+	BuddyAllocator(ID3D12Device5* device, const AllocatorInitData& initData);
 	~BuddyAllocator();
 
 	bool AllocResource(uint32_t size, uint32_t alignment, ResourceLocation& resourceLocation);
@@ -65,7 +65,7 @@ private:
 	uint32_t totalAllocSize = 0;
 	std::vector<std::set<uint32_t>> freeBlocks;
 	std::vector<BuddyBlockData> deferredDeletionQueue;
-	ID3D12Device* d3dDevice;
+	ID3D12Device5* d3dDevice;
 	Resource* backingResource = nullptr;
 	ID3D12Heap* backingHeap = nullptr;
 };
@@ -73,50 +73,64 @@ private:
 class MultiBuddyAllocator
 {
 public:
-	MultiBuddyAllocator(ID3D12Device* device, const BuddyAllocator::AllocatorInitData& initData);
+	MultiBuddyAllocator(ID3D12Device5* device, const BuddyAllocator::AllocatorInitData& initData);
 	~MultiBuddyAllocator();
 	bool AllocResource(uint32_t size, uint32_t alignment, ResourceLocation& resourceLocation);
 	void CleanUpAllocations();
 
 private:
 	std::vector<std::shared_ptr<BuddyAllocator>> allocators;
-	ID3D12Device* d3dDevice;
+	ID3D12Device5* d3dDevice;
 	BuddyAllocator::AllocatorInitData initData;
 };
 
 class UploadBufferAllocator
 {
 public:
-	UploadBufferAllocator(ID3D12Device* InDevice);
+	UploadBufferAllocator(ID3D12Device5* InDevice);
 	void* AllocUploadResource(uint32_t size, uint32_t alignment, ResourceLocation& resourceLocation);
 	void CleanUpAllocations();
 
 private:
 	std::unique_ptr<MultiBuddyAllocator> allocator = nullptr;
-	ID3D12Device* d3dDevice = nullptr;
+	ID3D12Device5* d3dDevice = nullptr;
 };
 
 class DefaultBufferAllocator
 {
 public:
-	DefaultBufferAllocator(ID3D12Device* InDevice);
+	DefaultBufferAllocator(ID3D12Device5* InDevice);
 	void AllocDefaultResource(const D3D12_RESOURCE_DESC& resourceDesc, uint32_t alignment, ResourceLocation& resourceLocation);
 	void CleanUpAllocations();
 
 private:
 	std::unique_ptr<MultiBuddyAllocator> allocator = nullptr;
 	std::unique_ptr<MultiBuddyAllocator> uavAllocator = nullptr;
-	ID3D12Device* d3dDevice = nullptr;
+	ID3D12Device5* d3dDevice = nullptr;
 };
 
 class TextureResourceAllocator
 {
 public:
-	TextureResourceAllocator(ID3D12Device* InDevice);
+	TextureResourceAllocator(ID3D12Device5* InDevice);
 	void AllocTextureResource(const D3D12_RESOURCE_STATES& resourceState, const D3D12_RESOURCE_DESC& resourceDesc, ResourceLocation& resourceLocation);
 	void CleanUpAllocations();
 
 private:
 	std::unique_ptr<MultiBuddyAllocator> allocator = nullptr;
-	ID3D12Device* d3dDevice = nullptr;
+	ID3D12Device5* d3dDevice = nullptr;
+};
+
+class DXRResourceAllocator
+{
+public:
+	DXRResourceAllocator(ID3D12Device5* InDevice);
+	void AllocAccelerationStructureResource(UINT64 sizeInBytes, const std::wstring& resourceName, ResourceLocation& resourceLocation);
+	void AllocScratchResource(UINT64 sizeInBytes, const std::wstring& resourceName, ResourceLocation& resourceLocation);
+	
+	void CleanUpAllocations();
+
+private:
+	std::unique_ptr<MultiBuddyAllocator> allocator = nullptr;
+	ID3D12Device5* d3dDevice = nullptr;
 };

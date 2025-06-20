@@ -15,7 +15,7 @@ public:
 	void DestroyCommandContext();
 
 	ID3D12CommandQueue* GetCommandQueue() { return commandQueue.Get(); }
-	ID3D12GraphicsCommandList* GetCommandList() { return commandList.Get(); }
+	ID3D12GraphicsCommandList4* GetCommandList() { return commandList.Get(); }
 	DescriptorCache* GetDescriptorCache() { return descriptorCache.get(); }
 
 	void ResetCommandAllocator();
@@ -28,7 +28,7 @@ private:
 	Device* device = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandListAlloc = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList = nullptr;
 	std::unique_ptr<DescriptorCache> descriptorCache = nullptr;
 
 private:
