@@ -1,15 +1,4 @@
-﻿//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// This code is licensed under the MIT License (MIT).
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
-
-#include "RaytracingAccelerationStructure.h"
+﻿#include "RaytracingAccelerationStructure.h"
 #include "../Utils/D3D12Utils.h"
 #include <stdexcept>
 
@@ -368,15 +357,11 @@ void RaytracingAccelerationStructureManager::Build(
     UINT frameIndex,
     bool bForceBuild)
 {
-    // 确保GPU缓冲区已更新
-    // 首先检查是否需要创建或重新创建缓冲区
     if (!m_bottomLevelASInstanceDescs || bForceBuild)
     {
         std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(m_numBottomLevelASInstances);
         for (UINT i = 0; i < m_numBottomLevelASInstances; i++)
         {
-            // 从之前收集的实例描述符复制数据
-            // 假设有一个方法可以获取之前设置的描述符
             instanceDescs[i] = GetBottomLevelASInstance(i);
         }
         
@@ -386,14 +371,11 @@ void RaytracingAccelerationStructureManager::Build(
             m_numBottomLevelASInstances);
     }
     
-    // 如果底层结构已经创建但需要更新数据
     else if (m_bottomLevelASInstanceDescs)
     {
-        // 直接将我们的实例描述符数据复制到GPU缓冲区
         void* mappedData = m_bottomLevelASInstanceDescs->GetResource()->mappedBaseAddress;
         if (mappedData)
         {
-            // 为每个实例描述符复制数据
             for (UINT i = 0; i < m_numBottomLevelASInstances; i++)
             {
                 static_cast<D3D12_RAYTRACING_INSTANCE_DESC*>(mappedData)[i] = 
@@ -425,7 +407,6 @@ void RaytracingAccelerationStructureManager::Build(
     {
         bool performUpdate = false; // Always rebuild top-level Acceleration Structure.
         
-        // 获取实例描述符缓冲区的GPU虚拟地址
         D3D12_GPU_VIRTUAL_ADDRESS instanceDescs = m_bottomLevelASInstanceDescs->GetResource()->D3DResource->GetGPUVirtualAddress();
         
         m_topLevelAS.Build(commandList, GetNumberOfBottomLevelASInstances(), instanceDescs, m_accelerationStructureScratch.Get(), descriptorHeap, performUpdate);
